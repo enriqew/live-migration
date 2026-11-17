@@ -189,6 +189,20 @@ async def change_station(
     return await idempotent(idempotency_key, "PATCH", f"/asemat/{station_id}", body_dict, work)
 
 
+@app.get("/asemat")
+async def stations():
+    async with pool.acquire() as conn, conn.cursor() as cur:
+        await cur.execute("SELECT id FROM asema ORDER BY id")
+        return {"asemat": [r[0] for r in await cur.fetchall()]}
+
+
+@app.get("/matkat/max-id")
+async def max_trip_id():
+    async with pool.acquire() as conn, conn.cursor() as cur:
+        await cur.execute("SELECT COALESCE(MAX(id), 0) FROM matka")
+        return {"max_id": (await cur.fetchone())[0]}
+
+
 @app.get("/health")
 async def health():
     async with pool.acquire() as conn, conn.cursor() as cur:

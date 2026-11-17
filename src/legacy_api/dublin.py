@@ -228,6 +228,13 @@ async def station_service(
     return await idempotent(idempotency_key, "POST", f"/stations/{number}/service", body_dict, work)
 
 
+@app.get("/stations")
+async def stations():
+    async with pool.connection() as conn:
+        cur = await conn.execute("SELECT number FROM station ORDER BY number")
+        return {"stations": [r[0] for r in await cur.fetchall()]}
+
+
 @app.get("/health")
 async def health():
     async with pool.connection() as conn:
