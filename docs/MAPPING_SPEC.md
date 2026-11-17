@@ -112,6 +112,7 @@ CREATE TABLE station (
 );
 
 CREATE TABLE station_status (
+    status_id       uuid PRIMARY KEY,
     station_id      uuid NOT NULL REFERENCES station,
     reported_at     timestamptz NOT NULL,
     polled_at       timestamptz,
@@ -119,9 +120,9 @@ CREATE TABLE station_status (
     docks_available integer NOT NULL CHECK (docks_available >= 0),
     is_open         boolean NOT NULL,
     is_renting      boolean,
-    is_returning    boolean,
-    PRIMARY KEY (station_id, reported_at)
+    is_returning    boolean
 );
+CREATE INDEX ON station_status (station_id, reported_at);
 
 CREATE TABLE trip (
     trip_id                 uuid PRIMARY KEY,
@@ -145,9 +146,13 @@ Plus, in schema `migration`, the bookkeeping the apply service owns: `id_map`, `
   UUID, recorded in this document at phase 1. The same legacy row always maps to the same target
   row, across restarts, replays and both implementations (`uuid.uuid5` in Python,
   `uuid_generate_v5` in SQL).
-- **Legacy keys:** `station.number` (A), `asema.id` (B, the exact string), `station_reading` maps
-  to `(station, reported_at)` and has no id of its own in the target, `rental.rental_id` (A),
-  `matka.id` (B).
+- **Legacy keys:** `station.number` (A), `asema.id` (B, the exact string),
+  `station_reading.reading_id` (A), `rental.rental_id` (A), `matka.id` (B).
+- **Every target row comes from exactly one legacy row.** `station_status` is keyed by the reading,
+  not by `(station, reported_at)`: in the older Dublin files two polls can carry the same station
+  report, and a natural key would fold two legacy rows into one target row. A delete of one of them
+  would then have to know whether the other still exists, and the apply step would stop being a
+  function of a single change event. Many-to-one mappings are kept out of the target on purpose.
 - **Helsinki has no trip id in its files.** Legacy B assigns `matka.id` at load, in file order, so
   the 6 exact duplicate rows of 2016-07 stay 12 distinct trips. Whether they are real repeats or a
   publishing error cannot be known, and the target does not guess.
