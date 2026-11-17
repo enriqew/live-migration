@@ -76,6 +76,26 @@ services:
       interval: 5s
       retries: 20
 
+  api-a:
+    # Dublin's application. Runs on Linux, where psycopg's async mode has its usual event loop.
+    build: .
+    command: ["uvicorn", "legacy_api.dublin:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      LEGACY_A_DSN: host=legacy-a port=5432 dbname=dublin user=dublin password=dublin
+    ports: ["8001:8000"]
+    depends_on:
+      legacy-a: {condition: service_healthy}
+
+  api-b:
+    build: .
+    command: ["uvicorn", "legacy_api.helsinki:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      LEGACY_B_HOST: legacy-b
+      LEGACY_B_PORT: "3306"
+    ports: ["8002:8000"]
+    depends_on:
+      legacy-b: {condition: service_healthy}
+
 volumes:
   legacy-a:
   legacy-b:
