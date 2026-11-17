@@ -11,8 +11,8 @@ CREATE TABLE asema (
     kaupunki     varchar(50),
     operaattori  varchar(100),
     kapasiteetti smallint,
-    x            decimal(9,6),
-    y            decimal(8,6)
+    x            decimal(16,13),  -- longitude, every published digit (up to 13 decimals)
+    y            decimal(16,13)   -- latitude
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE matka (

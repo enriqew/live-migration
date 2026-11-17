@@ -67,8 +67,8 @@ CREATE TABLE asema (                            -- 'station'
     kaupunki     varchar(50),
     operaattori  varchar(100),
     kapasiteetti smallint,
-    x            decimal(9,6),                  -- longitude
-    y            decimal(8,6)                   -- latitude
+    x            decimal(16,13),                -- longitude, as published (up to 13 decimals)
+    y            decimal(16,13)                 -- latitude
 );
 
 CREATE TABLE matka (                            -- 'trip'
@@ -179,6 +179,7 @@ wrong, so it is spelled out case by case.
 | all names | Trimmed of leading and trailing whitespace, Unicode NFC. Nothing else: no case change, no prettifying | same |
 | `station.capacity` | `bike_stands` | `kapasiteetti` |
 | `station.latitude`, `longitude` | `latitude`, `longitude` | `y`, `x` (the projected pair in the source file is not loaded) |
+| coordinate rounding | Dublin publishes at most 6 decimals, so nothing is rounded | Rounded to 6 decimals (about 11 cm), **half away from zero**, from the decimal value, never through a float. Python's `Decimal` rounds half to even by default and PostgreSQL's `round(numeric)` half away from zero: the two implementations must agree, and a tie is exactly where they would not |
 | `station.kind` | `public` | `service` for the ids listed in section 6; `unlisted` for an id that trips reference and `asema` does not have; `public` otherwise |
 | `station_status.is_open` | `status = 'OPEN'` | n/a |
 | `station_status` bikes and docks | `bikes`, `free_stands`. Their sum is not checked against capacity (6 to 7% of rows differ) | n/a |
