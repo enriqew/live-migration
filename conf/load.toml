@@ -1,0 +1,11 @@
+# The full load. Dublin from the first month both file eras are needed, to the last published;
+# Helsinki every season. Inclusive months.
+lock = "sources.lock.json"
+
+[dublin]
+first = "2021-10"
+last = "2026-06"
+
+[helsinki]
+first = "2016-03"
+last = "2025-11"

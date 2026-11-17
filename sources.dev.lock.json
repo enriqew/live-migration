@@ -1,0 +1,50 @@
+{
+  "files": {
+    "dublin/readings-2024-02": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2024-02",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/1244290a-9568-4cb6-ae1f-3a19b5300842/download/dublinbike-historical-data-2024-02.csv",
+      "months": [
+        "2024-02"
+      ],
+      "bytes": 17152808,
+      "sha256": "09e9720d82871d6f1c8abf0f8d45cde0605c301e1baf4f3708c2ba27373f1088"
+    },
+    "dublin/readings-2024-05": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2024-05",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/87a171b3-82b1-4e47-9b36-75e579adf3f9/download/dublin-bikes_station_status_052024.csv",
+      "months": [
+        "2024-05"
+      ],
+      "bytes": 77385821,
+      "sha256": "463d993b8b5df29ebdd20b158e5cd36be66bd88c07d3ae1b0c2e356fc8924aed"
+    },
+    "helsinki/stations": {
+      "system": "helsinki",
+      "kind": "stations",
+      "era": "hsl",
+      "name": "stations",
+      "url": "https://opendata.arcgis.com/datasets/726277c507ef4914b0aec3cbcfcbfafc_0.csv",
+      "months": [],
+      "bytes": 75944,
+      "sha256": "3ce4f8db140d1132fb73a08da33b12f7e6740d231b4515792ca858df3ea48e1f"
+    },
+    "helsinki/trips-2025-10": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2025-10",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2025/2025-10.csv",
+      "months": [
+        "2025-10"
+      ],
+      "bytes": 17837512,
+      "sha256": "89db1874ccde1fb9a2e440d49c8e54ad8c64c475de13df2eabf1538f4cf95769"
+    }
+  }
+}

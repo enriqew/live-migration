@@ -127,24 +127,17 @@ def dublin_catalog(first: Month, last: Month) -> list[SourceFile]:
     return select_dublin(package["resources"], first, last)
 
 
-def helsinki_catalog(first_season: int, last_season: int) -> list[SourceFile]:
-    files = [
-        SourceFile("helsinki", "stations", "hsl", "stations", HELSINKI_STATIONS, ()),
-    ]
-    for year in range(first_season, last_season + 1):
-        for month in range(3, 12):  # seasons have run from March at the earliest to October
-            url = HELSINKI_TRIPS.format(year=year, month=month)
-            if _exists(url):
-                files.append(
-                    SourceFile(
-                        "helsinki",
-                        "trips",
-                        "hsl",
-                        f"trips-{year}-{month:02d}",
-                        url,
-                        (f"{year}-{month:02d}",),
-                    )
-                )
+def helsinki_catalog(first: Month, last: Month) -> list[SourceFile]:
+    """The station register and every trips file that exists in [first, last].
+
+    Seasons have no fixed start (March in 2020, April or May otherwise) and the winter months have
+    no file, so a month is in the catalog only if its URL answers.
+    """
+    files = [SourceFile("helsinki", "stations", "hsl", "stations", HELSINKI_STATIONS, ())]
+    for m in months_between(first, last):
+        url = HELSINKI_TRIPS.format(year=m.year, month=m.month)
+        if _exists(url):
+            files.append(SourceFile("helsinki", "trips", "hsl", f"trips-{m}", url, (str(m),)))
     return files
 
 

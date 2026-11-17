@@ -1,0 +1,12 @@
+# A small load for development: the last JCDecaux-era month and the first GBFS-era month of
+# Dublin (2024-03 and 2024-04 have no file), and the Helsinki month with the autumn transition.
+# Never quoted anywhere: published figures come from the full load only.
+lock = "sources.dev.lock.json"
+
+[dublin]
+first = "2024-02"
+last = "2024-05"
+
+[helsinki]
+first = "2025-10"
+last = "2025-10"
