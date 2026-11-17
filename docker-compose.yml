@@ -1,0 +1,82 @@
+# Three databases on one machine: the two legacy systems and the target.
+# Images are pinned by digest; the tag is kept beside it for readability.
+name: live-migration
+
+services:
+  legacy-a:
+    # Dublin. Logical decoding is on from the start: CDC is configured in phase 2,
+    # and changing wal_level later would need a restart in the middle of a run.
+    image: postgres:18.7-bookworm@sha256:ece55f7868da684e400f82f1030a050718adbdd65c23aa500c486f6e2950dc0f
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+      - -c
+      - max_replication_slots=8
+      - -c
+      - max_wal_senders=8
+      - -c
+      - max_slot_wal_keep_size=4GB
+    environment:
+      POSTGRES_DB: dublin
+      POSTGRES_USER: dublin
+      POSTGRES_PASSWORD: dublin
+      TZ: UTC
+    ports: ["5433:5432"]
+    volumes:
+      - legacy-a:/var/lib/postgresql
+      - ./docker/legacy_a:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dublin -d dublin"]
+      interval: 5s
+      retries: 20
+
+  legacy-b:
+    # Helsinki. Row-based binlog with full row images and GTIDs, which Debezium needs.
+    image: mysql:8.4.13@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902
+    command:
+      - --server-id=1
+      - --log-bin=binlog
+      - --binlog-format=ROW
+      - --binlog-row-image=FULL
+      - --gtid-mode=ON
+      - --enforce-gtid-consistency=ON
+      - --local-infile=1
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --default-time-zone=+00:00
+    environment:
+      MYSQL_DATABASE: helsinki
+      MYSQL_USER: helsinki
+      MYSQL_PASSWORD: helsinki
+      MYSQL_ROOT_PASSWORD: root
+    ports: ["3307:3306"]
+    volumes:
+      - legacy-b:/var/lib/mysql
+      - ./docker/legacy_b:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"]
+      interval: 5s
+      retries: 30
+
+  target:
+    image: postgres:18.7-bookworm@sha256:ece55f7868da684e400f82f1030a050718adbdd65c23aa500c486f6e2950dc0f
+    command: ["postgres", "-c", "wal_level=logical", "-c", "max_replication_slots=8", "-c", "max_wal_senders=8"]
+    environment:
+      POSTGRES_DB: fleet
+      POSTGRES_USER: fleet
+      POSTGRES_PASSWORD: fleet
+      TZ: UTC
+    ports: ["5434:5432"]
+    volumes:
+      - target:/var/lib/postgresql
+      - ./docker/target:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fleet -d fleet"]
+      interval: 5s
+      retries: 20
+
+volumes:
+  legacy-a:
+  legacy-b:
+  target:
