@@ -67,7 +67,7 @@ def fetch(
             )
         if size == 0:
             raise RuntimeError(f"{key} downloaded empty from {f.url}")
-        new_entries[key] = {**asdict(f), "bytes": size, "sha256": digest}
+        new_entries[key] = {**asdict(f), "months": list(f.months), "bytes": size, "sha256": digest}
         print(f"fetched {key}: {size:,} bytes")
     lock = {"files": dict(sorted(new_entries.items()))}
     lock_path.write_text(json.dumps(lock, indent=2, ensure_ascii=False) + "\n", encoding="utf8")
