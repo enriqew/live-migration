@@ -147,8 +147,10 @@ the apply service wrote.
 
 ## 2. Identity
 
-- **Every target id is a UUIDv5** of `"<system>:<table>:<legacy key>"` under one fixed namespace
-  UUID, recorded in this document at phase 1. The same legacy row always maps to the same target
+- **Every target id is a UUIDv5** of `"<system>:<table>:<legacy key>"` under the namespace
+  `c040d936-f655-5978-9236-51f890c6a707`, itself the UUIDv5 of
+  `https://github.com/enriqew/live-migration/ids` in the URL namespace. Checked equal in both
+  implementations: `dublin:station:42` is `926653f3-c058-5793-b863-554e4c585425`. The same legacy row always maps to the same target
   row, across restarts, replays and both implementations (`uuid.uuid5` in Python,
   `uuid_generate_v5` in SQL).
 - **Legacy keys:** `station.number` (A), `asema.id` (B, the exact string),
@@ -174,6 +176,17 @@ wrong, so it is spelled out case by case.
 | **Ambiguous, legacy B** | Of the four `(fold departure, fold return)` combinations, pick the one whose `returned_at - departed_at` is closest to `duration_sec`. On a tie, `fold=0` and the flag `ambiguous_time` |
 | Nonexistent (spring gap) | Never seen in the samples. If one appears: quarantined with reason `nonexistent_local_time`, never shifted |
 | `polled_at` (A, older era) | Same rules as `reported_at`, independently |
+| Rentals (A) | Written live by the API from the wall clock. An ambiguous or nonexistent `started` or `ended` is quarantined (`ambiguous_local_time`): a live write during the autumn hour is the one case the legacy data cannot resolve |
+
+**How the legacy A rule is applied.** The fold of a reading depends on the other readings of its
+station in the same hour, so applying it event by event would make the target depend on the order
+events arrive in. Instead, both implementations resolve it from legacy A directly, once:
+
+- The ambiguous hours in legacy A are historic (one per autumn) and never written again, so the
+  fold of every reading in them is computed from legacy A before applying anything: the apply
+  service at startup, with one query; the verifier with a window function over the same rows.
+- An event whose wall time is ambiguous and whose reading is not in that set (a reading written
+  in an autumn hour after startup) is quarantined with `ambiguous_local_time`, not guessed.
 
 ## 4. Values
 
