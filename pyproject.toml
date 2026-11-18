@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
   "aiomysql>=0.3.2",
+  "cryptography>=43",  # MySQL 8 caching_sha2_password: the first login after a restart is RSA
   "fastapi>=0.163.1",
   "httpx>=0.28.1",
   "psycopg-pool>=3.3.3",
