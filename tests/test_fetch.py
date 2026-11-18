@@ -46,3 +46,21 @@ def test_a_file_matching_the_lock_is_not_downloaded_again(tmp_path, fake_downloa
     fetch_mod.fetch([F], tmp_path / "raw", tmp_path / "lock.json")
     monkeypatch.setattr(fetch_mod, "download", lambda *a: pytest.fail("downloaded again"))
     fetch_mod.fetch([F], tmp_path / "raw", tmp_path / "lock.json")
+
+
+def test_an_interrupted_fetch_keeps_the_files_it_finished(tmp_path, monkeypatch):
+    second = SourceFile(
+        "helsinki", "trips", "hsl", "trips-2025-08", "https://example.invalid/y", ("2025-08",)
+    )
+
+    def _download(url, dest):
+        if url.endswith("/y"):
+            raise ConnectionError("cut")
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(b"a,b\n1,2\n")
+
+    monkeypatch.setattr(fetch_mod, "download", _download)
+    with pytest.raises(ConnectionError):
+        fetch_mod.fetch([F, second], tmp_path / "raw", tmp_path / "lock.json")
+    lock = json.loads((tmp_path / "lock.json").read_text())
+    assert list(lock["files"]) == ["helsinki/trips-2025-07"]

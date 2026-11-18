@@ -69,6 +69,15 @@ def fetch(
             raise RuntimeError(f"{key} downloaded empty from {f.url}")
         new_entries[key] = {**asdict(f), "months": list(f.months), "bytes": size, "sha256": digest}
         print(f"fetched {key}: {size:,} bytes")
-    lock = {"files": dict(sorted(new_entries.items()))}
-    lock_path.write_text(json.dumps(lock, indent=2, ensure_ascii=False) + "\n", encoding="utf8")
+        # Pinned as soon as it is downloaded, so an interrupted fetch keeps what it finished.
+        _write(lock_path, {**entries, **new_entries})
+    # The final lock holds exactly the catalog: files that left it are dropped here.
+    return _write(lock_path, new_entries)
+
+
+def _write(lock_path: Path, entries: dict) -> dict:
+    lock = {"files": dict(sorted(entries.items()))}
+    tmp = lock_path.with_suffix(lock_path.suffix + ".tmp")
+    tmp.write_text(json.dumps(lock, indent=2, ensure_ascii=False) + "\n", encoding="utf8")
+    tmp.replace(lock_path)  # a reader never sees half a lock
     return lock
