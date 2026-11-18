@@ -81,7 +81,7 @@ def test_a_rental_still_out_is_flagged_and_has_no_return():
     assert trip["departed_at"] == utc(2026, 11, 18, 10, 0)
 
 
-def trip(departure, ret, duration, distance=1000):
+def trip(departure, ret, duration, distance="1000"):
     return {
         "id": 1,
         "departure": departure,
@@ -109,7 +109,9 @@ def test_a_helsinki_tie_takes_fold_zero_and_says_so():
 
 
 def test_helsinki_defects_become_flags_not_guesses():
-    t = helsinki_trip(trip(datetime(2025, 7, 31, 23, 50), datetime(2025, 7, 31, 23, 40), 323, -12))
+    t = helsinki_trip(
+        trip(datetime(2025, 7, 31, 23, 50), datetime(2025, 7, 31, 23, 40), 323, "-12")
+    )
     assert t["distance_m"] is None
     assert t["flags"] == ["negative_distance", "returned_before_departed"]
     gap = helsinki_trip(trip(datetime(2025, 3, 30, 3, 30), datetime(2025, 3, 30, 4, 40), 600))
@@ -154,3 +156,8 @@ def test_folds_step_once_per_station_in_reading_order():
         datetime(2024, 10, 27, 1),
         datetime(2025, 10, 26, 1),
     ]
+
+
+def test_helsinki_distance_is_kept_to_the_centimetre():
+    t = helsinki_trip(trip(datetime(2018, 6, 1, 8, 0), datetime(2018, 6, 1, 8, 10), 600, "1941.67"))
+    assert t["distance_m"] == Decimal("1941.67")

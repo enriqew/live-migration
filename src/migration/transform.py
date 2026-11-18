@@ -244,7 +244,7 @@ def helsinki_trip(row: dict) -> dict | Quarantine:
     flags = []
     if ambiguous and tie:
         flags.append("ambiguous_time")
-    distance = row["covered_distance_m"]
+    distance = Decimal(row["covered_distance_m"]) if row["covered_distance_m"] is not None else None
     if distance is not None and distance < 0:
         distance = None
         flags.append("negative_distance")
