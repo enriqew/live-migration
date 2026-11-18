@@ -87,10 +87,15 @@ async def send(
 
 
 async def discover(dublin: httpx.AsyncClient, helsinki: httpx.AsyncClient) -> World:
-    d = (await dublin.get("/stations")).raise_for_status().json()["stations"]
+    stations = (await dublin.get("/stations")).raise_for_status().json()
     h = (await helsinki.get("/asemat")).raise_for_status().json()["asemat"]
     m = (await helsinki.get("/matkat/max-id")).raise_for_status().json()["max_id"]
-    return World(dublin_stations=d, helsinki_stations=h, helsinki_max_trip_id=m)
+    return World(
+        dublin_stations=stations["stations"],
+        helsinki_stations=h,
+        helsinki_max_trip_id=m,
+        out_of_service=set(stations["out_of_service"]),
+    )
 
 
 async def run(args) -> dict:

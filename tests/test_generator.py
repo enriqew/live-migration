@@ -27,3 +27,15 @@ def test_returns_and_erases_carry_the_rental_they_took():
     stream = OpStream(3, "run", w, share_dublin=1.0)
     taken = [o for o in (stream.next() for _ in range(300)) if o.kind in ("return", "erase")]
     assert taken and all(o.rental is not None and str(o.rental) in o.path for o in taken)
+
+
+def test_no_more_than_five_percent_of_stations_are_ever_out_of_service():
+    w = World(
+        dublin_stations=list(range(1, 101)), helsinki_stations=["043"], helsinki_max_trip_id=1
+    )
+    stream = OpStream(5, "run", w, share_dublin=1.0)
+    worst = 0
+    for _ in range(5000):
+        stream.next()
+        worst = max(worst, len(w.out_of_service))
+    assert 0 < worst <= 5

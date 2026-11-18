@@ -33,6 +33,7 @@ class World:
     helsinki_max_trip_id: int
     open_rentals: list[int] = field(default_factory=list)
     own_trips: list[int] = field(default_factory=list)
+    out_of_service: set[int] = field(default_factory=set)
 
 
 # Relative weights. Inserts dominate, as in the real systems; updates and deletes are rare but
@@ -95,16 +96,20 @@ class OpStream:
                 op.rental = rental
                 return op
             case "service":
-                body = rng.choice(
-                    [
-                        {"is_renting": False},
-                        {"is_renting": True},
-                        {"is_returning": False},
-                        {"is_returning": True},
-                        {"status": "CLOSED"},
-                        {"status": "OPEN"},
-                    ]
-                )
+                # Stations go out of service and come back. At most 5% are out at once, and the
+                # generator always knows which, or random toggles would close the city over a run.
+                cap = max(1, len(w.dublin_stations) // 20)
+                if w.out_of_service and (len(w.out_of_service) >= cap or rng.random() < 0.5):
+                    station = rng.choice(sorted(w.out_of_service))
+                    w.out_of_service.discard(station)
+                    body = {"status": "OPEN", "is_renting": True, "is_returning": True}
+                else:
+                    candidates = [n for n in w.dublin_stations if n not in w.out_of_service]
+                    station = rng.choice(candidates)
+                    w.out_of_service.add(station)
+                    body = rng.choice(
+                        [{"is_renting": False}, {"is_returning": False}, {"status": "CLOSED"}]
+                    )
                 return self._op("dublin", kind, "POST", f"/stations/{station}/service", body)
             case "rename":
                 body = {
