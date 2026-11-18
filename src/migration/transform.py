@@ -36,9 +36,10 @@ def target_id(system: str, table: str, key: object) -> uuid.UUID:
 
 
 def clean_name(text: str | None) -> str | None:
+    """Trimmed and NFC; a value that is empty once trimmed is null."""
     if text is None:
         return None
-    return unicodedata.normalize("NFC", text.strip())
+    return unicodedata.normalize("NFC", text.strip()) or None
 
 
 def round_coordinate(text: str | None) -> Decimal | None:
@@ -81,7 +82,9 @@ def _single_or_quarantine(wall: datetime, zone: ZoneInfo, what: str) -> datetime
 # --- Dublin -------------------------------------------------------------------------------------
 
 
-def dublin_station(row: dict) -> dict:
+def dublin_station(row: dict) -> dict | Quarantine:
+    if clean_name(row["name"]) is None:
+        return Quarantine("blank_name", repr(row["name"]))
     return {
         "station_id": target_id("dublin", "station", row["number"]),
         "system_code": "dublin",
@@ -171,8 +174,10 @@ def dublin_rental(row: dict) -> dict | Quarantine:
 # --- Helsinki -----------------------------------------------------------------------------------
 
 
-def helsinki_station(row: dict) -> dict:
+def helsinki_station(row: dict) -> dict | Quarantine:
     station_id = row["id"]
+    if clean_name(row["nimi"]) is None:
+        return Quarantine("blank_name", repr(row["nimi"]))
     return {
         "station_id": target_id("helsinki", "asema", station_id),
         "system_code": "helsinki",

@@ -36,6 +36,7 @@ def test_names_are_trimmed_and_nfc_and_nothing_else():
     assert clean_name(" Puotila") == "Puotila"
     assert clean_name(decomposed) == "Sörnäinen (M)"
     assert clean_name("CLARENDON ROW") == "CLARENDON ROW"
+    assert clean_name(" ") is None  # the Helsinki register's city of one space
 
 
 def test_wall_time_kinds_in_dublin():
@@ -170,3 +171,19 @@ def test_helsinki_gaps_in_the_published_trip_stay_gaps():
     assert t["duration_s"] is None and t["departure_station_id"] is None
     assert t["departed_at"] == utc(2025, 10, 26, 0, 30)
     assert t["flags"] == ["ambiguous_time", "missing_departure_station"]
+
+
+def test_a_blank_station_name_is_quarantined():
+    base = {
+        "id": "777",
+        "nimi": "  ",
+        "namn": None,
+        "name": None,
+        "osoite": None,
+        "kaupunki": " ",
+        "kapasiteetti": None,
+        "x": None,
+        "y": None,
+    }
+    assert helsinki_station(base) == Quarantine("blank_name", "'  '")
+    assert helsinki_station({**base, "nimi": "Asema"})["city"] is None

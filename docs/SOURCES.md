@@ -87,6 +87,7 @@ What the samples showed (2016-07, 2025-07, 2025-10):
   Same credit as above.
 - **Columns:** trilingual names (`Nimi`, `Namn`, `Name`), addresses in Finnish and Swedish, city,
   operator, capacity (`Kapasiteet`), WGS84 coordinates and a projected pair.
+- **347 of the 457 have a city and an operator of one space** (`' '`), not empty and not null.
 - **457 stations.** 7 of the 458 departure ids seen in 2025-07 are not in it: the service and test
   stations above, and stations since removed. Trips reference stations the register does not list.
 

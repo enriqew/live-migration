@@ -161,7 +161,9 @@ the apply service wrote.
   would then have to know whether the other still exists, and the apply step would stop being a
   function of a single change event. Many-to-one mappings are kept out of the target on purpose.
 - **Helsinki has no trip id in its files.** Legacy B assigns `matka.id` at load, in file order, so
-  the 6 exact duplicate rows of 2016-07 stay 12 distinct trips. Whether they are real repeats or a
+  the 6 exact duplicate rows of 2016-07 stay 12 distinct trips. The ids are unique and increasing
+  but not contiguous: MySQL's default `innodb_autoinc_lock_mode=2` reserves ids for `LOAD DATA` in
+  batches, and the full load leaves about 2 million gaps. Nothing here depends on contiguity. Whether they are real repeats or a
   publishing error cannot be known, and the target does not guess.
 
 ## 3. Time
@@ -194,7 +196,7 @@ events arrive in. Instead, both implementations resolve it from legacy A directl
 |---|---|---|
 | `station.name` | `station.name`, verbatim | `asema.nimi` |
 | `station.name_sv`, `name_en` | null | `asema.namn`, `asema.name` |
-| all names | Trimmed of leading and trailing whitespace, Unicode NFC. Nothing else: no case change, no prettifying | same |
+| all names and addresses | Trimmed of leading and trailing whitespace, Unicode NFC. A value that is empty once trimmed is null (347 Helsinki stations have a city of one space); a required `station.name` that is empty once trimmed is quarantined (`blank_name`). Nothing else: no case change, no prettifying | same |
 | `station.capacity` | `bike_stands` | `kapasiteetti` |
 | `station.latitude`, `longitude` | `latitude`, `longitude` | `y`, `x` (the projected pair in the source file is not loaded) |
 | coordinate rounding | Dublin publishes at most 6 decimals, so nothing is rounded | Rounded to 6 decimals (about 11 cm), **half away from zero**, from the decimal value, never through a float. Python's `Decimal` rounds half to even by default and PostgreSQL's `round(numeric)` half away from zero: the two implementations must agree, and a tie is exactly where they would not |
