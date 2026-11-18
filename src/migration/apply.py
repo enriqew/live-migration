@@ -393,17 +393,13 @@ def apply_batch(
                 ),
             )
 
-        if winners:
-            cur.executemany(
-                "INSERT INTO migration.row_version (target_table, row_id, source, pos_major, "
-                "pos_minor, deleted) VALUES (%s, %s, %s, %s, %s, %s) "
-                "ON CONFLICT (target_table, row_id) DO UPDATE SET pos_major = EXCLUDED.pos_major, "
-                "pos_minor = EXCLUDED.pos_minor, deleted = EXCLUDED.deleted",
-                [
-                    (c.target_table, c.row_id, c.legacy[0], *c.pos, c.kind == "delete")
-                    for c in winners
-                ],
-            )
+        _merge(
+            cur,
+            "migration.row_version",
+            ["target_table", "row_id", "source", "pos_major", "pos_minor", "deleted"],
+            [(c.target_table, c.row_id, c.legacy[0], *c.pos, c.kind == "delete") for c in winners],
+            ["target_table", "row_id"],
+        )
         source, txn_ids = applied_txns
         if txn_ids:
             cur.executemany(
@@ -422,11 +418,34 @@ def apply_batch(
     return stats
 
 
+def _merge(cur, table: str, columns: list[str], rows: list[tuple], key: list[str]) -> None:
+    """COPY the rows into a session-local staging table, then one set-based upsert.
+
+    `newest` has already left one change per key, so the INSERT never meets its own key twice.
+    """
+    if not rows:
+        return
+    stage = "_stage_" + table.replace(".", "_")
+    cur.execute(f"CREATE TEMP TABLE IF NOT EXISTS {stage} (LIKE {table}) ON COMMIT DELETE ROWS")
+    cols = ", ".join(columns)
+    with cur.copy(f"COPY {stage} ({cols}) FROM STDIN") as copy:
+        for row in rows:
+            copy.write_row(row)
+    updates = ", ".join(f"{c} = EXCLUDED.{c}" for c in columns if c not in key)
+    cur.execute(
+        f"INSERT INTO {table} ({cols}) SELECT {cols} FROM {stage} "
+        f"ON CONFLICT ({', '.join(key)}) DO UPDATE SET {updates}"
+    )
+
+
 def _upsert(cur, table: str, changes: list[Change]) -> None:
-    if changes:
-        cur.executemany(
-            _upsert_sql(table), [tuple(c.row[k] for k in COLUMNS[table]) for c in changes]
-        )
+    _merge(
+        cur,
+        f"fleet.{table}",
+        COLUMNS[table],
+        [tuple(c.row[k] for k in COLUMNS[table]) for c in changes],
+        [PK[table]],
+    )
 
 
 def _remove_stations(cur, changes: list[Change]) -> None:
