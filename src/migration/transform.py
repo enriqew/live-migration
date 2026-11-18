@@ -207,11 +207,14 @@ def helsinki_station_stub(station_id: str) -> dict:
     }
 
 
-def _helsinki_folds(departure: datetime, returned: datetime, duration: int):
-    """The (fold departure, fold return) the spec picks, and whether it was a tie."""
+def _helsinki_folds(departure: datetime, returned: datetime, duration: int | None):
+    """The (fold departure, fold return) the spec picks, and whether it was undecided."""
     kinds = (kind_of_wall_time(departure, HELSINKI), kind_of_wall_time(returned, HELSINKI))
     if "nonexistent" in kinds:
         return None, False
+    if duration is None:
+        # Nothing to compare against: fold 0, and undecided if anything was ambiguous.
+        return (0, 0), "ambiguous" in kinds
     dep_folds = (0, 1) if kinds[0] == "ambiguous" else (0,)
     ret_folds = (0, 1) if kinds[1] == "ambiguous" else (0,)
     scored = []
@@ -226,6 +229,10 @@ def _helsinki_folds(departure: datetime, returned: datetime, duration: int):
     if tie:
         return (0, 0), True
     return (scored[0][1], scored[0][2]), False
+
+
+def _station_ref(station_id: str | None) -> uuid.UUID | None:
+    return target_id("helsinki", "asema", station_id) if station_id is not None else None
 
 
 def helsinki_trip(row: dict) -> dict | Quarantine:
@@ -250,11 +257,15 @@ def helsinki_trip(row: dict) -> dict | Quarantine:
         flags.append("negative_distance")
     if returned_at < departed_at:
         flags.append("returned_before_departed")
+    if row["departure_station_id"] is None:
+        flags.append("missing_departure_station")
+    if row["return_station_id"] is None:
+        flags.append("missing_return_station")
     return {
         "trip_id": target_id("helsinki", "matka", row["id"]),
         "system_code": "helsinki",
-        "departure_station_id": target_id("helsinki", "asema", row["departure_station_id"]),
-        "return_station_id": target_id("helsinki", "asema", row["return_station_id"]),
+        "departure_station_id": _station_ref(row["departure_station_id"]),
+        "return_station_id": _station_ref(row["return_station_id"]),
         "departed_at": departed_at,
         "returned_at": returned_at,
         "duration_s": row["duration_sec"],

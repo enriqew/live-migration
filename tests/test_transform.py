@@ -161,3 +161,12 @@ def test_folds_step_once_per_station_in_reading_order():
 def test_helsinki_distance_is_kept_to_the_centimetre():
     t = helsinki_trip(trip(datetime(2018, 6, 1, 8, 0), datetime(2018, 6, 1, 8, 10), 600, "1941.67"))
     assert t["distance_m"] == Decimal("1941.67")
+
+
+def test_helsinki_gaps_in_the_published_trip_stay_gaps():
+    row = trip(datetime(2025, 10, 26, 3, 30), datetime(2025, 10, 26, 3, 40), None)
+    row["departure_station_id"] = None
+    t = helsinki_trip(row)
+    assert t["duration_s"] is None and t["departure_station_id"] is None
+    assert t["departed_at"] == utc(2025, 10, 26, 0, 30)
+    assert t["flags"] == ["ambiguous_time", "missing_departure_station"]
