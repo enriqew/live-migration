@@ -50,6 +50,9 @@ CREATE TABLE fleet.trip (
     distance_m            numeric(10,2) CHECK (distance_m >= 0),
     flags                 text[] NOT NULL DEFAULT '{}'
 );
+-- A stub station is removed when no trip names it any more: these answer that question.
+CREATE INDEX trip_departure_station ON fleet.trip (departure_station_id);
+CREATE INDEX trip_return_station ON fleet.trip (return_station_id);
 
 -- The version guard. One row per target row ever written, deletes included: a delete leaves a
 -- tombstone with its position, so an insert of the same row arriving late and out of order is
@@ -85,4 +88,15 @@ CREATE TABLE migration.quarantine (
     pos_minor    bigint      NOT NULL,
     recorded_at  timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (source, legacy_table, legacy_key)
+);
+
+-- Source transactions already applied. After a restart, events above the committed offsets are
+-- read again; one whose transaction is listed here is applied on its own (a no-op under the
+-- version guard) instead of waiting for an END that lies below the committed offset of the
+-- transaction topic and will never be read again. Pruned once it is older than any replay.
+CREATE TABLE migration.applied_txn (
+    source      text        NOT NULL,
+    txn_id      text        NOT NULL,
+    applied_at  timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (source, txn_id)
 );

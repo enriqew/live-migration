@@ -209,8 +209,9 @@ events arrive in. Instead, both implementations resolve it from legacy A directl
 
 **Stations a trip references and the register lacks** exist in the target as stubs:
 `kind = 'unlisted'`, `name` = the station id itself, every other column null. The set of Helsinki
-stations is therefore exactly the ids in `asema` plus the ids any `matka` row names, and each one
-comes from a single place: its `asema` row if there is one, the stub otherwise.
+stations is therefore exactly the ids in `asema` plus the ids named by the Helsinki trips in the
+target (a quarantined trip names nothing), and each one comes from a single place: its `asema`
+row if there is one, the stub otherwise. A stub no trip names any more is removed.
 
 The name is the id, not a name copied from a trip, on purpose. "The name the first trip carries"
 would make a station a function of many trips and of the order they arrived in, and deleting that
