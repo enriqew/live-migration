@@ -23,7 +23,7 @@ CREATE TABLE matka (
     departure_station_name  varchar(100),
     return_station_id       varchar(8)   NOT NULL,
     return_station_name     varchar(100),
-    covered_distance_m      int,
+    covered_distance_m      decimal(10,2),  -- metres; 2018 onwards some carry centimetres
     duration_sec            int          NOT NULL,
     KEY matka_departure (departure)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

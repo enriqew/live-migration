@@ -21,6 +21,7 @@ from pathlib import Path
 
 _DATETIME = re.compile(r"^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2}:\d{2}))?$")
 _INTEGER = re.compile(r"^-?\d+(?:\.0+)?$")
+_METRES = re.compile(r"^-?\d+(?:\.\d{1,2})?$")
 
 
 @dataclass
@@ -46,7 +47,7 @@ class Matka:
     departure_station_name: str | None
     return_station_id: str
     return_station_name: str | None
-    covered_distance_m: int | None
+    covered_distance_m: str | None  # decimal text, up to two places
     duration_sec: int
 
 
@@ -72,6 +73,19 @@ def integer(value: str) -> int | None:
     return int(text.split(".")[0])
 
 
+def metres(value: str) -> str | None:
+    """A distance as published: whole metres, or metres with up to two decimals (2018 onwards).
+
+    Kept as decimal text so nothing is rounded on the way into legacy B's decimal(10,2).
+    """
+    text = value.strip()
+    if text == "":
+        return None
+    if not _METRES.match(text):
+        raise ValueError(f"not a distance in metres: {value!r}")
+    return text
+
+
 def _opt(value: str) -> str | None:
     return value if value != "" else None
 
@@ -90,7 +104,7 @@ def parse_trips(path: Path) -> list[Matka]:
                 departure_station_name=_opt(r["Departure station name"]),
                 return_station_id=r["Return station id"],
                 return_station_name=_opt(r["Return station name"]),
-                covered_distance_m=integer(r["Covered distance (m)"]),
+                covered_distance_m=metres(r["Covered distance (m)"]),
                 duration_sec=duration,
             )
         )

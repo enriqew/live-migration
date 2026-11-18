@@ -27,8 +27,17 @@ def test_trips_keep_their_defects(tmp_path):
     assert trips[0].return_station_name == "Sörnäinen (M)"
     assert trips[1].departure_station_name == " Puotila"  # not trimmed in legacy B
     assert trips[1].covered_distance_m is None
-    assert trips[2].covered_distance_m == -12
+    assert trips[2].covered_distance_m == "-12"
     assert trips[2].return_ < trips[2].departure  # returned before departed, kept as published
+
+
+def test_distances_keep_their_centimetres():
+    from loader.helsinki import metres
+
+    assert metres("1941.67") == "1941.67"
+    assert metres("712") == "712"
+    with pytest.raises(ValueError):
+        metres("1941.675")
 
 
 def test_integer_accepts_whole_decimals_only():

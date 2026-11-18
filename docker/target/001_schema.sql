@@ -47,7 +47,7 @@ CREATE TABLE fleet.trip (
     departed_at           timestamptz NOT NULL,
     returned_at           timestamptz,
     duration_s            integer,
-    distance_m            integer CHECK (distance_m >= 0),
+    distance_m            numeric(10,2) CHECK (distance_m >= 0),
     flags                 text[] NOT NULL DEFAULT '{}'
 );
 

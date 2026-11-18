@@ -79,7 +79,7 @@ CREATE TABLE matka (                            -- 'trip'
     departure_station_name  varchar(100),
     return_station_id       varchar(8) NOT NULL,
     return_station_name     varchar(100),
-    covered_distance_m      int,                -- null and negative values exist
+    covered_distance_m      decimal(10,2),      -- null and negative values exist; some cm
     duration_sec            int NOT NULL
 );
 ```
@@ -132,7 +132,7 @@ CREATE TABLE trip (
     departed_at             timestamptz NOT NULL,
     returned_at             timestamptz,
     duration_s              integer,
-    distance_m              integer CHECK (distance_m >= 0),
+    distance_m              numeric(10,2) CHECK (distance_m >= 0),
     flags                   text[] NOT NULL DEFAULT '{}'
 );
 ```
@@ -201,7 +201,7 @@ events arrive in. Instead, both implementations resolve it from legacy A directl
 | `station.kind` | `public` | `service` for the ids listed in section 6; `unlisted` for an id that trips reference and `asema` does not have; `public` otherwise |
 | `station_status.is_open` | `status = 'OPEN'` | n/a |
 | `station_status` bikes and docks | `bikes`, `free_stands`. Their sum is not checked against capacity (6 to 7% of rows differ) | n/a |
-| `trip.distance_m` | null (rentals carry no distance) | `covered_distance_m`; a negative value becomes null with flag `negative_distance` |
+| `trip.distance_m` | null (rentals carry no distance) | `covered_distance_m`, exactly (some seasons publish centimetres, so the column keeps two decimals rather than rounding to metres); a negative value becomes null with flag `negative_distance` |
 | `trip.duration_s` | `ended - started` in seconds, null while open | `duration_sec`, verbatim, never recomputed |
 | `trip.flags` | `open_rental` while `to_station` is null | `returned_before_departed` when it does; `ambiguous_time` (section 3); `negative_distance` |
 
