@@ -205,9 +205,16 @@ events arrive in. Instead, both implementations resolve it from legacy A directl
 | `trip.duration_s` | `ended - started` in seconds, null while open | `duration_sec`, verbatim, never recomputed |
 | `trip.flags` | `open_rental` while `to_station` is null | `returned_before_departed` when it does; `ambiguous_time` (section 3); `negative_distance` |
 
-**Stations a trip references and the register lacks** are created by the first trip that names
-them, with `kind = 'unlisted'`, the name the trip carries (trimmed, NFC), and every other column
-null. A later row in `asema` with the same id upgrades it in place.
+**Stations a trip references and the register lacks** exist in the target as stubs:
+`kind = 'unlisted'`, `name` = the station id itself, every other column null. The set of Helsinki
+stations is therefore exactly the ids in `asema` plus the ids any `matka` row names, and each one
+comes from a single place: its `asema` row if there is one, the stub otherwise.
+
+The name is the id, not a name copied from a trip, on purpose. "The name the first trip carries"
+would make a station a function of many trips and of the order they arrived in, and deleting that
+trip would have to rename the station. A row in `asema` arriving later replaces the stub in place;
+an `asema` row deleted while trips still name its id turns the station back into the stub. Target
+stations are never deleted, since trips reference them.
 
 ## 5. Quarantine
 
