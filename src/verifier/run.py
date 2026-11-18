@@ -115,7 +115,9 @@ def canonical(col: str, dtype: str) -> str:
 
 
 def hashed(con, name: str, source: str, pk: str, cols: list[str]) -> None:
-    types = dict(con.execute(f"SELECT column_name, data_type FROM (DESCRIBE {source})").fetchall())
+    types = dict(
+        con.execute(f"SELECT column_name, column_type FROM (DESCRIBE {source})").fetchall()
+    )
     parts = " || chr(31) || ".join(canonical(c, types[c]) for c in cols)
     con.execute(
         f"CREATE OR REPLACE TABLE {name} AS SELECT {pk} AS id, "
