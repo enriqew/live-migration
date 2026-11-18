@@ -218,13 +218,14 @@ Both sides of a comparison are reduced to the same text before hashing:
 
 ## 8. Versions
 
-Current stable lines on 2026-11-17. Exact patch tags and image digests are pinned in Compose and
-recorded here at phase 1.
+Pinned 2026-11-18. Images are pinned by digest in `docker-compose.yml`; the tags below are for
+reading. Debezium's tag is republished nightly on a new base image, so only the digest is stable.
 
-| Component | Line |
-|---|---|
-| PostgreSQL (legacy A, target) | 18 (18.7) |
-| MySQL (legacy B) | 8.4 LTS |
-| Apache Kafka, KRaft | 4.3 (4.3.1) |
-| Debezium | 3.6 (support for PostgreSQL 18 confirmed before pinning) |
-| Python | 3.13 or 3.14, whichever every dependency supports |
+| Component | Version | Note |
+|---|---|---|
+| PostgreSQL (legacy A, target) | 18.7 | |
+| MySQL (legacy B) | 8.4.13 LTS | |
+| Apache Kafka, KRaft | 4.3.2 | The latest patch of the line Debezium's Connect runtime is built on (4.3.1); 4.4.0 was available and not taken |
+| Debezium Connect | 3.7.1.Final | The 3.6 line found on 2026-11-17 was already superseded |
+| Apicurio Registry | 3.3.4 | KafkaSQL storage |
+| Python (APIs, in their image) | 3.13 | Locally 3.14; the project requires 3.13 or later |
