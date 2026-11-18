@@ -36,6 +36,7 @@ def main() -> None:
     p.add_argument("--config", default="conf/load.toml")
     p.add_argument("--reset", action="store_true", help="empty the legacy systems before loading")
     p.add_argument("--update-lock", action="store_true", help="accept files changed at the source")
+    p.add_argument("--only", choices=["dublin", "helsinki"], help="load one legacy system")
     args = p.parse_args()
 
     config_path = ROOT / args.config
@@ -53,8 +54,11 @@ def main() -> None:
     else:
         files = from_lock(lock_path)
         ep = Endpoints()
-        a = load_dublin([f for f in files if f.system == "dublin"], raw_dir, ep, args.reset)
-        b = load_helsinki([f for f in files if f.system == "helsinki"], raw_dir, ep, args.reset)
+        a = b = 0
+        if args.only in (None, "dublin"):
+            a = load_dublin([f for f in files if f.system == "dublin"], raw_dir, ep, args.reset)
+        if args.only in (None, "helsinki"):
+            b = load_helsinki([f for f in files if f.system == "helsinki"], raw_dir, ep, args.reset)
         print(f"loaded {a:,} Dublin readings and {b:,} Helsinki trips")
 
 
