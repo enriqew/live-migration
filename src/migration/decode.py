@@ -94,7 +94,9 @@ def _full_name(schema: dict) -> str:
 
 def _semantic_types(envelope: dict, raw_by_name: dict) -> dict[str, str]:
     """Column name to `connect.name` for the row record the envelope's `after` refers to."""
-    after = next(f for f in envelope["fields"] if f["name"] == "after")
+    after = next((f for f in envelope["fields"] if f["name"] == "after"), None)
+    if after is None:  # not a row envelope: a transaction BEGIN/END record
+        return {}
     ref = next(t for t in after["type"] if t != "null")
     if isinstance(ref, str):
         full = ref if "." in ref else f"{envelope.get('namespace')}.{ref}"
