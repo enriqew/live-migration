@@ -230,9 +230,20 @@ async def station_service(
 
 @app.get("/stations")
 async def stations():
+    """Every station, and whether its latest reading has it fully in service."""
     async with pool.connection() as conn:
-        cur = await conn.execute("SELECT number FROM station ORDER BY number")
-        return {"stations": [r[0] for r in await cur.fetchall()]}
+        cur = await conn.execute(
+            "SELECT s.number, COALESCE(r.status = 'OPEN' AND r.is_renting IS NOT FALSE "
+            "  AND r.is_returning IS NOT FALSE, false) "
+            "FROM station s LEFT JOIN LATERAL (SELECT status, is_renting, is_returning "
+            "  FROM station_reading WHERE station_number = s.number "
+            "  ORDER BY reading_id DESC LIMIT 1) r ON true ORDER BY s.number"
+        )
+        rows = await cur.fetchall()
+    return {
+        "stations": [n for n, _ in rows],
+        "out_of_service": [n for n, ok in rows if not ok],
+    }
 
 
 @app.get("/health")
