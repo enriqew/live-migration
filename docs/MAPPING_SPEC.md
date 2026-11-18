@@ -137,8 +137,13 @@ CREATE TABLE trip (
 );
 ```
 
-Plus, in schema `migration`, the bookkeeping the apply service owns: `id_map`, `source_position`
-(per row), `consumer_offset`, `quarantine`. The verifier reads `quarantine` and nothing else there.
+Plus, in schema `migration`, the bookkeeping the apply service owns: `row_version` (the source
+position that last wrote each target row, and a tombstone once it is deleted), `consumer_offset`,
+`quarantine`. The verifier reads `quarantine` and nothing else there.
+
+There is no id map. Every target id is a pure function of its legacy key (section 2), so nothing
+about identity has to be stored, and the verifier derives the same ids without reading anything
+the apply service wrote.
 
 ## 2. Identity
 
