@@ -117,6 +117,8 @@ async def run(args) -> dict:
                     world.open_rentals.append(data["rental_id"])
                 elif op.on_success == "own_trip":
                     world.own_trips.append(data["id"])
+            elif outcome.result != ACCEPTED and op.rental is not None:
+                world.open_rentals.append(op.rental)
             outcomes.append(outcome)
 
         t0_wall, t0 = time.time(), time.monotonic()

@@ -19,6 +19,9 @@ class Op:
     key: str
     # Filled by the runner from the response, for operations that create something.
     on_success: str | None = None
+    # The open rental a return or an erase takes off the open list; it goes back on the list
+    # if the operation is not accepted, or the bike would stay out for the rest of the run.
+    rental: int | None = None
 
 
 @dataclass
@@ -81,12 +84,16 @@ class OpStream:
                 )
             case "return":
                 rental = w.open_rentals.pop(rng.randrange(len(w.open_rentals)))
-                return self._op(
+                op = self._op(
                     "dublin", kind, "POST", f"/rentals/{rental}/return", {"to_station": station}
                 )
+                op.rental = rental
+                return op
             case "erase":
                 rental = w.open_rentals.pop(rng.randrange(len(w.open_rentals)))
-                return self._op("dublin", kind, "DELETE", f"/rentals/{rental}", None)
+                op = self._op("dublin", kind, "DELETE", f"/rentals/{rental}", None)
+                op.rental = rental
+                return op
             case "service":
                 body = rng.choice(
                     [
