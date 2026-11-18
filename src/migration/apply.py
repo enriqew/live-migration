@@ -508,6 +508,13 @@ class Service:
                 f"{fm.stations_without_step} station-hours without a backward step"
             )
         self.target = psycopg.connect(TARGET_DSN)
+        # Commits do not wait for the WAL to reach the disk. A crash can lose the last few, but
+        # each batch carries its rows and its offsets in one transaction, so they are lost
+        # together, the restart reads them again from the earlier offset, and the version guard
+        # applies them again. Durability is the source's and Kafka's; the target only has to be
+        # consistent, and atomicity is what keeps it so.
+        self.target.execute("SET synchronous_commit = off")
+        self.target.commit()
         stored = dict(
             ((t, p), o)
             for t, p, o in self.target.execute(
@@ -648,7 +655,7 @@ class Service:
 def main() -> None:
     p = argparse.ArgumentParser(prog="migration.apply")
     p.add_argument("system", choices=["dublin", "helsinki"])
-    p.add_argument("--batch", type=int, default=5000)
+    p.add_argument("--batch", type=int, default=20000)
     args = p.parse_args()
     Service(args.system, args.batch).run()
 

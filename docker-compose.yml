@@ -61,7 +61,22 @@ services:
 
   target:
     image: postgres:18.7-bookworm@sha256:ece55f7868da684e400f82f1030a050718adbdd65c23aa500c486f6e2950dc0f
-    command: ["postgres", "-c", "wal_level=logical", "-c", "max_replication_slots=8", "-c", "max_wal_senders=8"]
+    # Logical decoding for the reverse replication of phase 5. The WAL settings are the usual ones
+    # for a bulk load: fewer checkpoints and full-page writes, compressed.
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+      - -c
+      - max_replication_slots=8
+      - -c
+      - max_wal_senders=8
+      - -c
+      - max_wal_size=8GB
+      - -c
+      - checkpoint_timeout=15min
+      - -c
+      - wal_compression=zstd
     environment:
       POSTGRES_DB: fleet
       POSTGRES_USER: fleet
