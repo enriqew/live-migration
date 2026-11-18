@@ -75,12 +75,12 @@ CREATE TABLE matka (                            -- 'trip'
     id                      bigint AUTO_INCREMENT PRIMARY KEY,
     departure               datetime NOT NULL,  -- Europe/Helsinki wall clock
     `return`                datetime NOT NULL,  -- reserved word, quoted on purpose
-    departure_station_id    varchar(8) NOT NULL,
+    departure_station_id    varchar(8),         -- null in 665 published trips
     departure_station_name  varchar(100),
-    return_station_id       varchar(8) NOT NULL,
+    return_station_id       varchar(8),         -- null in 360
     return_station_name     varchar(100),
     covered_distance_m      decimal(10,2),      -- null and negative values exist; some cm
-    duration_sec            int NOT NULL
+    duration_sec            int                 -- null in 209,264, 2018 onwards
 );
 ```
 
@@ -127,7 +127,7 @@ CREATE INDEX ON station_status (station_id, reported_at);
 CREATE TABLE trip (
     trip_id                 uuid PRIMARY KEY,
     system_code             text NOT NULL REFERENCES system,
-    departure_station_id    uuid NOT NULL REFERENCES station,
+    departure_station_id    uuid REFERENCES station,      -- null only when the source had none
     return_station_id       uuid REFERENCES station,      -- null while a Dublin rental is open
     departed_at             timestamptz NOT NULL,
     returned_at             timestamptz,
@@ -173,7 +173,7 @@ wrong, so it is spelled out case by case.
 |---|---|
 | Legacy wall-clock time that exists once | Convert with the system's zone (`Europe/Dublin`, `Europe/Helsinki`) |
 | **Ambiguous, legacy A** (autumn hour repeated) | Per station, in `reading_id` order, the wall clock steps backwards once inside that hour: readings before the step are summer time (`fold=0`), readings after it winter time (`fold=1`). `reading_id` is the only witness of real order, which is why legacy A keeps it. A station with no backward step in the hour gets `fold=0`, and the run report counts those stations |
-| **Ambiguous, legacy B** | Of the four `(fold departure, fold return)` combinations, pick the one whose `returned_at - departed_at` is closest to `duration_sec`. On a tie, `fold=0` and the flag `ambiguous_time` |
+| **Ambiguous, legacy B** | Of the four `(fold departure, fold return)` combinations, pick the one whose `returned_at - departed_at` is closest to `duration_sec`. On a tie, or with no published duration to compare against, `fold=0` and the flag `ambiguous_time` |
 | Nonexistent (spring gap) | Never seen in the samples. If one appears: quarantined with reason `nonexistent_local_time`, never shifted |
 | `polled_at` (A, older era) | Same rules as `reported_at`, independently |
 | Rentals (A) | Written live by the API from the wall clock. An ambiguous or nonexistent `started` or `ended` is quarantined (`ambiguous_local_time`): a live write during the autumn hour is the one case the legacy data cannot resolve |
@@ -203,7 +203,7 @@ events arrive in. Instead, both implementations resolve it from legacy A directl
 | `station_status` bikes and docks | `bikes`, `free_stands`. Their sum is not checked against capacity (6 to 7% of rows differ) | n/a |
 | `trip.distance_m` | null (rentals carry no distance) | `covered_distance_m`, exactly (some seasons publish centimetres, so the column keeps two decimals rather than rounding to metres); a negative value becomes null with flag `negative_distance` |
 | `trip.duration_s` | `ended - started` in seconds, null while open | `duration_sec`, verbatim, never recomputed |
-| `trip.flags` | `open_rental` while `to_station` is null | `returned_before_departed` when it does; `ambiguous_time` (section 3); `negative_distance` |
+| `trip.flags` | `open_rental` while `to_station` is null | `returned_before_departed` when it does; `ambiguous_time` (section 3); `negative_distance`; `missing_departure_station` / `missing_return_station` when the published trip names none (the station column stays null: nothing is invented) |
 
 **Stations a trip references and the register lacks** exist in the target as stubs:
 `kind = 'unlisted'`, `name` = the station id itself, every other column null. The set of Helsinki

@@ -19,12 +19,12 @@ CREATE TABLE matka (
     id                      bigint       NOT NULL AUTO_INCREMENT PRIMARY KEY,
     departure               datetime     NOT NULL,
     `return`                datetime     NOT NULL,
-    departure_station_id    varchar(8)   NOT NULL,
+    departure_station_id    varchar(8),          -- null in 665 published trips
     departure_station_name  varchar(100),
-    return_station_id       varchar(8)   NOT NULL,
+    return_station_id       varchar(8),          -- null in 360
     return_station_name     varchar(100),
     covered_distance_m      decimal(10,2),  -- metres; 2018 onwards some carry centimetres
-    duration_sec            int          NOT NULL,
+    duration_sec            int,                 -- null in 209,264, 2018 onwards
     KEY matka_departure (departure)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 

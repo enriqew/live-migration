@@ -43,12 +43,12 @@ class Asema:
 class Matka:
     departure: str
     return_: str
-    departure_station_id: str
+    departure_station_id: str | None
     departure_station_name: str | None
-    return_station_id: str
+    return_station_id: str | None
     return_station_name: str | None
     covered_distance_m: str | None  # decimal text, up to two places
-    duration_sec: int
+    duration_sec: int | None
 
 
 def _rows(path: Path) -> Iterator[dict[str, str]]:
@@ -94,15 +94,13 @@ def parse_trips(path: Path) -> list[Matka]:
     trips = []
     for r in _rows(path):
         duration = integer(r["Duration (sec.)"])
-        if duration is None:
-            raise ValueError(f"{path.name}: trip with no duration: {r}")
         trips.append(
             Matka(
                 departure=datetime_text(r["Departure"]),
                 return_=datetime_text(r["Return"]),
-                departure_station_id=r["Departure station id"],
+                departure_station_id=_opt(r["Departure station id"]),
                 departure_station_name=_opt(r["Departure station name"]),
-                return_station_id=r["Return station id"],
+                return_station_id=_opt(r["Return station id"]),
                 return_station_name=_opt(r["Return station name"]),
                 covered_distance_m=metres(r["Covered distance (m)"]),
                 duration_sec=duration,

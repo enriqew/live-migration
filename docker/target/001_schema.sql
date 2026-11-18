@@ -42,7 +42,7 @@ CREATE INDEX station_status_station_reported ON fleet.station_status (station_id
 CREATE TABLE fleet.trip (
     trip_id               uuid PRIMARY KEY,
     system_code           text NOT NULL REFERENCES fleet.system,
-    departure_station_id  uuid NOT NULL REFERENCES fleet.station,
+    departure_station_id  uuid REFERENCES fleet.station,  -- null only when the source had none
     return_station_id     uuid REFERENCES fleet.station,
     departed_at           timestamptz NOT NULL,
     returned_at           timestamptz,

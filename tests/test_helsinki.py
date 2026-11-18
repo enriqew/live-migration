@@ -19,6 +19,7 @@ def test_trips_keep_their_defects(tmp_path):
         "2025-10-01,2025-10-01T00:05:25,043,Karhupuisto,044,Sörnäinen (M),712,224",
         "2025-07-31T23:59:58,2025-08-01T00:08:37,*40, Puotila,121,Vilhonvuorenkatu,,516",
         "2025-07-31T23:50:00,2025-07-31T23:40:00,006,Hietalahdentori,036,Apollonkatu,-12,323",
+        "2018-05-21T20:41:34,2018-05-21T21:11:36,143,Kuikkarinne,,,1800,",
     ]
     trips = parse_trips(write(tmp_path, TRIPS_HEADER + "\n".join(rows) + "\n"))
     # A bare date is midnight, as MySQL stores it.
@@ -29,6 +30,8 @@ def test_trips_keep_their_defects(tmp_path):
     assert trips[1].covered_distance_m is None
     assert trips[2].covered_distance_m == "-12"
     assert trips[2].return_ < trips[2].departure  # returned before departed, kept as published
+    # Published gaps are nulls in legacy B, not empty strings.
+    assert trips[3].return_station_id is None and trips[3].duration_sec is None
 
 
 def test_distances_keep_their_centimetres():
