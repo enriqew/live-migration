@@ -1,0 +1,1480 @@
+{
+  "files": {
+    "dublin/readings-2021-10--2021-12": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2021-10--2021-12",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/5bc73751-4280-4423-b64d-18f4cc17986d/download/dublinbikes_20211001_20220101.csv",
+      "months": [
+        "2021-10",
+        "2021-11",
+        "2021-12"
+      ],
+      "bytes": 309897504,
+      "sha256": "48150ec881affe6d641fe740a18294a29b03b033664bd4a1ad11e14e36919c97"
+    },
+    "dublin/readings-2022-01": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2022-01",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/d4a7a8ef-24d4-4d47-967f-945e4a6a3a7b/download/dublinbike-historical-data-2022-01.csv",
+      "months": [
+        "2022-01"
+      ],
+      "bytes": 17762573,
+      "sha256": "1f35aab269aa9fdca486e06f638f75b43fb011b0e8d9a3b4156323360e8234dd"
+    },
+    "dublin/readings-2022-02": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2022-02",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/39d9346f-69fc-40bb-baba-97f3ef3dcfdf/download/dublinbike-historical-data-2022-02.csv",
+      "months": [
+        "2022-02"
+      ],
+      "bytes": 16026770,
+      "sha256": "54577c213da81b7f2d5b1ec0aa4283bac40ebb108a5a5bb6c92cd7c31f1049e8"
+    },
+    "dublin/readings-2022-03": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2022-03",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/7f4dfdf6-a651-4fc3-9f13-d91d49ff3ddb/download/dublinbike-historical-data-2022-03.csv",
+      "months": [
+        "2022-03"
+      ],
+      "bytes": 17713969,
+      "sha256": "b732f332ea680f18c919b14b268128a268796bfea413d6be3d6447472911daa4"
+    },
+    "dublin/readings-2022-04": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2022-04",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/98869541-aa65-48b7-b4b7-4a72775a9c2f/download/dublinbike-historical-data-2022-04.csv",
+      "months": [
+        "2022-04"
+      ],
+      "bytes": 17198164,
+      "sha256": "ca7cc1283d04017f2d944ac4d5e7f46b70e98005cc1ebe9a021728f8f24b0d1e"
+    },
+    "dublin/readings-2022-05": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2022-05",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/e859cda6-93cb-4175-ab49-7d7cffb1f471/download/dublinbike-historical-data-2022-05.csv",
+      "months": [
+        "2022-05"
+      ],
+      "bytes": 18031061,
+      "sha256": "ee2f75de5305018bca781a572b856d459c4452df30f2437466db08b0cc5794d0"
+    },
+    "dublin/readings-2022-06": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2022-06",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/b0100d31-2b1c-4f8d-86c8-a2bd4c6c026c/download/dublinbike-historical-data-2022-06.csv",
+      "months": [
+        "2022-06"
+      ],
+      "bytes": 17458576,
+      "sha256": "08e7c66c32d417efd16a574107a74f38f099f1062dfbae4529aa4c8af7ba2a5f"
+    },
+    "dublin/readings-2022-07": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2022-07",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/9b024f2c-3011-4ece-8b75-10cec711b333/download/dublinbike-historical-data-2022-07.csv",
+      "months": [
+        "2022-07"
+      ],
+      "bytes": 18050240,
+      "sha256": "b84ef1f3ea3ecc14740f5fe89e95aa08d5d86459f5524239a3e6a8d669ae080e"
+    },
+    "dublin/readings-2022-08": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2022-08",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/924dcd0a-66eb-4ec7-bfe4-f3df9d8dfef4/download/dublinbike-historical-data-2022-08.csv",
+      "months": [
+        "2022-08"
+      ],
+      "bytes": 18206625,
+      "sha256": "6a625881cc463987f77c76f0f80bb76ca2b54fcd6720f42f2ec0192e9b3f62fa"
+    },
+    "dublin/readings-2022-09": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2022-09",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/2c8d84e5-4034-4356-a134-0e783f0febca/download/dublinbike-historical-data-2022-09.csv",
+      "months": [
+        "2022-09"
+      ],
+      "bytes": 16773271,
+      "sha256": "c651472a672c05a7565a8f9343ea2e9a1b9cda14b1c36969bcd5e895673d36d9"
+    },
+    "dublin/readings-2022-10": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2022-10",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/6350733b-b823-4174-95fd-c76c711cc384/download/dublinbike-historical-data-2022-10.csv",
+      "months": [
+        "2022-10"
+      ],
+      "bytes": 18227409,
+      "sha256": "54ea66ea1bd2bc586249f08d2e197887f86896eb93e619dd9c12e1157ef84c20"
+    },
+    "dublin/readings-2022-11": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2022-11",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/4ef07f87-23d0-433c-b80c-0c6ae2ed4c1b/download/dublinbike-historical-data-2022-11.csv",
+      "months": [
+        "2022-11"
+      ],
+      "bytes": 17595248,
+      "sha256": "4f67f602ed9563d64315f5b43f9d11a92064930980e2073998c286fc003f3684"
+    },
+    "dublin/readings-2022-12": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2022-12",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/79ab48c8-6135-4fd5-a7af-e74495a34777/download/dublinbike-historical-data-2022-12.csv",
+      "months": [
+        "2022-12"
+      ],
+      "bytes": 18207661,
+      "sha256": "d455b1897f2e7e156a379f7cc6e8461f1b763ad2e7994cfa9345c13305e73dd4"
+    },
+    "dublin/readings-2023-01": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2023-01",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/ac920fc9-d73d-4565-81e0-31c179bc741c/download/dublinbike-historical-data-2023-01.csv",
+      "months": [
+        "2023-01"
+      ],
+      "bytes": 18201849,
+      "sha256": "c61e4b2b2cb8991543bb05f29e8fa5eee6e2e8cc2b6cf8c0a410f0e1ee74303d"
+    },
+    "dublin/readings-2023-02": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2023-02",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/4ee172c9-dfc1-4e4b-afc7-0dc83c17a240/download/dublinbike-historical-data-2023-02.csv",
+      "months": [
+        "2023-02"
+      ],
+      "bytes": 16589890,
+      "sha256": "e0a68f25c297715cab3d418f40a8f156f2364932a7151223fe106844f25eeff0"
+    },
+    "dublin/readings-2023-03": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2023-03",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/6b505ff7-35b7-4a6f-abce-b62b8889aae8/download/dublinbike-historical-data-2023-03.csv",
+      "months": [
+        "2023-03"
+      ],
+      "bytes": 18390975,
+      "sha256": "5d83eb070134b7c2242e05e9c6b6bab71805f4701ef300454d743a6d38127362"
+    },
+    "dublin/readings-2023-04": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2023-04",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/61ad0229-43a8-44c6-8bc3-fc8580b0794a/download/dublinbike-historical-data-2023-04.csv",
+      "months": [
+        "2023-04"
+      ],
+      "bytes": 17756096,
+      "sha256": "f2ad694d8675a98242d4c0e4324e7f5ce43f03f7b607a661633885402bd7405f"
+    },
+    "dublin/readings-2023-05": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2023-05",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/2ab9de3a-f965-4917-bf53-4dbe9dbfab4d/download/dublinbike-historical-data-2023-05.csv",
+      "months": [
+        "2023-05"
+      ],
+      "bytes": 18336770,
+      "sha256": "4221125fe1167c2b4746b6c6a060e557a004e0d5bb19269c8801d3efad537e11"
+    },
+    "dublin/readings-2023-06": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2023-06",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/8b99c18f-bb0e-4f27-bdbb-c649f83dd487/download/dublinbike-historical-data-2023-06.csv",
+      "months": [
+        "2023-06"
+      ],
+      "bytes": 17688407,
+      "sha256": "2a41a6015a5a0eb006a5154e3989ece021f455a41ea946112e9414248f213e6c"
+    },
+    "dublin/readings-2023-07": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2023-07",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/70925ddc-18b6-4325-9103-1a2f3f320f5a/download/dublinbike-historical-data-2023-07.csv",
+      "months": [
+        "2023-07"
+      ],
+      "bytes": 18348480,
+      "sha256": "187abe84033967f5878148ec4516933f8e63d2bcf724145a9a333e45c12beae6"
+    },
+    "dublin/readings-2023-08": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2023-08",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/95e5514b-c516-4173-bdc2-27181cd8d75e/download/dublinbike-historical-data-2023-08.csv",
+      "months": [
+        "2023-08"
+      ],
+      "bytes": 18318420,
+      "sha256": "da610b58c759ff64760de2397a8b3130c201b12af1205fe3d978b29c834cbef6"
+    },
+    "dublin/readings-2023-09": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2023-09",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/455f744b-8bea-403a-a7a6-a32904d9e255/download/dublinbike-historical-data-2023-09.csv",
+      "months": [
+        "2023-09"
+      ],
+      "bytes": 17742497,
+      "sha256": "a53c45bf94925f54cc9877e9b4db4c70669a7b0fc224e5673099efcf93b86d0c"
+    },
+    "dublin/readings-2023-10": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2023-10",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/0027dd4c-c749-4ea2-8413-e323d959f44c/download/dublinbike-historical-data-2023-10.csv",
+      "months": [
+        "2023-10"
+      ],
+      "bytes": 18358115,
+      "sha256": "5d0e64e121969c377c4a36bbc54378f93c3cd4a39b50cc724a1461e6fc19888f"
+    },
+    "dublin/readings-2023-11": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2023-11",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/d4bd9069-630b-4ae5-b58b-cf8f74e8de9e/download/dublinbike-historical-data-2023-11.csv",
+      "months": [
+        "2023-11"
+      ],
+      "bytes": 17741523,
+      "sha256": "caa4ec151ab6df315fb529a379b4010a7b90638d2fbf9e2e426b058ed38ab1c7"
+    },
+    "dublin/readings-2023-12": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2023-12",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/969e942a-ab88-46e1-ae85-bd3a62112bc1/download/dublinbike-historical-data-2023-12.csv",
+      "months": [
+        "2023-12"
+      ],
+      "bytes": 18335634,
+      "sha256": "d14a36b9b35007548f92de35e1e57c08fadad49e506b29b524981bfab8b64fe6"
+    },
+    "dublin/readings-2024-01": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2024-01",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/6bad1ee7-2c2b-4a52-9567-db7445fc64ff/download/dublinbike-historical-data-2024-01.csv",
+      "months": [
+        "2024-01"
+      ],
+      "bytes": 18286108,
+      "sha256": "e54ac66a13f948f710e607dc08b114227b98340fc51bade8f80911ccb27e566e"
+    },
+    "dublin/readings-2024-02": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "jcdecaux",
+      "name": "readings-2024-02",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/1244290a-9568-4cb6-ae1f-3a19b5300842/download/dublinbike-historical-data-2024-02.csv",
+      "months": [
+        "2024-02"
+      ],
+      "bytes": 17152808,
+      "sha256": "09e9720d82871d6f1c8abf0f8d45cde0605c301e1baf4f3708c2ba27373f1088"
+    },
+    "dublin/readings-2024-05": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2024-05",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/87a171b3-82b1-4e47-9b36-75e579adf3f9/download/dublin-bikes_station_status_052024.csv",
+      "months": [
+        "2024-05"
+      ],
+      "bytes": 77385821,
+      "sha256": "463d993b8b5df29ebdd20b158e5cd36be66bd88c07d3ae1b0c2e356fc8924aed"
+    },
+    "dublin/readings-2024-06": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2024-06",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/022119a2-7679-4742-9b0a-c39dce0f38c1/download/dublin-bikes_station_status_062024.csv",
+      "months": [
+        "2024-06"
+      ],
+      "bytes": 77555349,
+      "sha256": "b3dddfda584bf7af76bc68d44dc3f178c5ae4cb69815b4a8535365ea0a1beadf"
+    },
+    "dublin/readings-2024-07": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2024-07",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/7f8ccbf8-4144-48b6-971a-02d534d164e5/download/dublin-bikes_station_status_072024.csv",
+      "months": [
+        "2024-07"
+      ],
+      "bytes": 82307654,
+      "sha256": "7172a630171b9733e4d7809b8afbdbf3618bb2b1dfdfdb8434a3f814bfe9f95b"
+    },
+    "dublin/readings-2024-08": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2024-08",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/6c13cb05-f31e-414e-a8be-16f2d9f4e53e/download/dublin-bikes_station_status_082024.csv",
+      "months": [
+        "2024-08"
+      ],
+      "bytes": 82070469,
+      "sha256": "e8540ac2100ea1d58a8427a3090f16d55956f95c2590915f6f2a179277924355"
+    },
+    "dublin/readings-2024-09": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2024-09",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/168f55b8-1c3d-4fd3-95b9-f92f388c772a/download/dublin-bikes_station_status_092024.csv",
+      "months": [
+        "2024-09"
+      ],
+      "bytes": 7008163,
+      "sha256": "a9e7c830b494aa0ac6719dc7cba828d1f828ed1dd81aab5564cdfebff12c36b7"
+    },
+    "dublin/readings-2024-10": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2024-10",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/f9182676-043d-41dc-a8d4-fe602f677a0d/download/dublin-bikes_station_status_102024.csv",
+      "months": [
+        "2024-10"
+      ],
+      "bytes": 82410262,
+      "sha256": "16765136f4c4712c9192ebd2133fff25ff6d1784bf6829b1b7430a311b2f1812"
+    },
+    "dublin/readings-2024-11": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2024-11",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/578d5726-8e59-4d15-84d0-bb755c530e22/download/dublin-bikes_station_status_112024.csv",
+      "months": [
+        "2024-11"
+      ],
+      "bytes": 78718185,
+      "sha256": "1444bfbda7d212f814c7980ad268d5ccaa29881c135f75ede4d6697de0c7512e"
+    },
+    "dublin/readings-2024-12": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2024-12",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/215455d4-6028-4035-aca6-455e48ba80f1/download/dublin-bikes_station_status_122024.csv",
+      "months": [
+        "2024-12"
+      ],
+      "bytes": 78562005,
+      "sha256": "e9f66c1ea7b4b680bf24f897fcf40263157cb6efe1d587a9aa94d760dd8f2314"
+    },
+    "dublin/readings-2025-01": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2025-01",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/3b10f5a3-58f0-4fa6-9210-ae950a185ab8/download/dublin-bikes_station_status_012025.csv",
+      "months": [
+        "2025-01"
+      ],
+      "bytes": 78970209,
+      "sha256": "73a3ce2fb59edf9d75bd77f0733b5208335755380a75376c24137b264ffab0a1"
+    },
+    "dublin/readings-2025-02": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2025-02",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/2bac02ee-d480-48d5-bece-b3968fb74c30/download/dublin-bikes_station_status_022025.csv",
+      "months": [
+        "2025-02"
+      ],
+      "bytes": 71068955,
+      "sha256": "08467a97eee6af56fc00f1289852b2b22c9dde893c067cfcc517b7571a344117"
+    },
+    "dublin/readings-2025-03": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2025-03",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/ef819959-8183-45d4-a0bb-8027cf8f0876/download/dublin-bikes_station_status_032025.csv",
+      "months": [
+        "2025-03"
+      ],
+      "bytes": 81647804,
+      "sha256": "d0641afa4f9adbc1b2c29bc388a220a967f8a607d8bb42bc800b35f90c25b91d"
+    },
+    "dublin/readings-2025-04": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2025-04",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/ab8604b5-9fe4-4e7b-b112-6ebacdfd039d/download/dublin-bikes_station_status_042025.csv",
+      "months": [
+        "2025-04"
+      ],
+      "bytes": 79291801,
+      "sha256": "9144a715d5ce1b0c60b2fbfc140a99a490b5d2db9ac2849663d95cf11687d006"
+    },
+    "dublin/readings-2025-05": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2025-05",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/b67b71f3-311e-4206-aed1-ce0c958947c9/download/dublin-bikes_station_status_052025.csv",
+      "months": [
+        "2025-05"
+      ],
+      "bytes": 83066881,
+      "sha256": "e13ac6a1e9cc30b6a7042c5eb921eb720f4445cebb1252c6cb92c836edf61f8e"
+    },
+    "dublin/readings-2025-06": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2025-06",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/11fd116e-760a-4237-9bcf-abbace46a32a/download/dublin-bikes_station_status_062025.csv",
+      "months": [
+        "2025-06"
+      ],
+      "bytes": 78735956,
+      "sha256": "52d7366eb50d19f21f320dd621a91be77fb028f60137b7c81d5663896596bf18"
+    },
+    "dublin/readings-2025-07": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2025-07",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/5b5afbcc-61e0-48d0-870e-a22df2ea4793/download/dublin-bikes_station_status_072025.csv",
+      "months": [
+        "2025-07"
+      ],
+      "bytes": 77982615,
+      "sha256": "3ca6c881ca4b0a87f9b0c98d2cddfe18586582366c25c83b734a4f6013620313"
+    },
+    "dublin/readings-2025-08": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2025-08",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/1cb1e957-3600-4cfc-abf7-6d5749108d4e/download/dublin-bikes_station_status_082025.csv",
+      "months": [
+        "2025-08"
+      ],
+      "bytes": 82899289,
+      "sha256": "577b857fdd48cc87d76b58407de90e59d6d322da3c0dbed7b0d325557b216468"
+    },
+    "dublin/readings-2025-09": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2025-09",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/921175fc-4182-4616-b981-35da50dacea1/download/dublin-bikes_station_status_092025.csv",
+      "months": [
+        "2025-09"
+      ],
+      "bytes": 80796137,
+      "sha256": "89e71124ba152ad0b12a5709fc36f9440ec39893e27cca79fabd62bb6dee5afe"
+    },
+    "dublin/readings-2025-10": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2025-10",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/c9556189-9df4-4391-a0c4-18c3b8bc9f54/download/dublin-bikes_station_status_102025.csv",
+      "months": [
+        "2025-10"
+      ],
+      "bytes": 83263216,
+      "sha256": "108588dccfd989d96956b27ce8ce3e38b36e5907350a5c8e5e3785a9fdf2fc5c"
+    },
+    "dublin/readings-2025-11": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2025-11",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/e432e75f-ad0d-44ff-8e09-2a5ab88972e5/download/dublin-bikes_station_status_112025.csv",
+      "months": [
+        "2025-11"
+      ],
+      "bytes": 79642886,
+      "sha256": "3244549f066e4b0dd40af07a678b060a2b314ae39c3be77094f448305d991cac"
+    },
+    "dublin/readings-2025-12": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2025-12",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/89b9cc0c-e1da-4993-ba99-b64c70953d4e/download/dublin-bikes_station_status_122025.csv",
+      "months": [
+        "2025-12"
+      ],
+      "bytes": 79760905,
+      "sha256": "0f531ee96766a7e46d73d7b4f810acd744ed6893dd2ea61be77b409b579b436c"
+    },
+    "dublin/readings-2026-01": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2026-01",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/afff7586-654b-40e3-8c65-e76ce88a1ccc/download/dublin-bikes_station_status_012026.csv",
+      "months": [
+        "2026-01"
+      ],
+      "bytes": 61093855,
+      "sha256": "beabde1f10501975e7f77e424c4233a3677cd5562fadf8cd9b417040dd5400cd"
+    },
+    "dublin/readings-2026-02": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2026-02",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/91098ee8-7ea7-4c70-b96d-face618a02b6/download/dublin-bikes_station_status_022026.csv",
+      "months": [
+        "2026-02"
+      ],
+      "bytes": 59001239,
+      "sha256": "234ce7f8c68b4500c13f6e3a305cad1994e8966551ce1bd5ab1e7106431f6759"
+    },
+    "dublin/readings-2026-03": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2026-03",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/33bbe7a6-3b30-49cf-a13d-0ef622dbedb1/download/dublin-bikes_station_status_032026.csv",
+      "months": [
+        "2026-03"
+      ],
+      "bytes": 81171453,
+      "sha256": "ecaa490f0d99919805ee3ce09006c81f9b9a3a868ad537d3fb5d6de626962323"
+    },
+    "dublin/readings-2026-04": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2026-04",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/92857912-1a36-4c8e-bd85-d26177609dbf/download/dublin-bikes_station_status_042026.csv",
+      "months": [
+        "2026-04"
+      ],
+      "bytes": 80063854,
+      "sha256": "315b02361fb090bd77e8953fa5cd585b4b4b99e1dc99ff4758772b566b4a3362"
+    },
+    "dublin/readings-2026-05": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2026-05",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/03dd67ef-33b0-4102-8329-42c67fdbf53e/download/dublin-bikes_station_status_052026.csv",
+      "months": [
+        "2026-05"
+      ],
+      "bytes": 82660047,
+      "sha256": "a3369d44bb9cfa716c553380215f7be68da0f4cc911ac8274241e29c155859bb"
+    },
+    "dublin/readings-2026-06": {
+      "system": "dublin",
+      "kind": "readings",
+      "era": "gbfs",
+      "name": "readings-2026-06",
+      "url": "https://data.smartdublin.ie/dataset/33ec9fe2-4957-4e9a-ab55-c5e917c7a9ab/resource/fdce169c-3164-46b3-bc71-fb8684e50ef4/download/dublin-bikes_station_status_062026.csv",
+      "months": [
+        "2026-06"
+      ],
+      "bytes": 78661246,
+      "sha256": "2e313663ee7266082ec81597719266e9d423aa784b1af6c490849eca29db7abb"
+    },
+    "helsinki/stations": {
+      "system": "helsinki",
+      "kind": "stations",
+      "era": "hsl",
+      "name": "stations",
+      "url": "https://opendata.arcgis.com/datasets/726277c507ef4914b0aec3cbcfcbfafc_0.csv",
+      "months": [],
+      "bytes": 75944,
+      "sha256": "3ce4f8db140d1132fb73a08da33b12f7e6740d231b4515792ca858df3ea48e1f"
+    },
+    "helsinki/trips-2016-05": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2016-05",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2016/2016-05.csv",
+      "months": [
+        "2016-05"
+      ],
+      "bytes": 6900442,
+      "sha256": "fc1e62bffcd208e34df4e8a3237272f0e762b3422ed3058d29008e14d363654a"
+    },
+    "helsinki/trips-2016-06": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2016-06",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2016/2016-06.csv",
+      "months": [
+        "2016-06"
+      ],
+      "bytes": 6509541,
+      "sha256": "f2f3804643b92ae57684617a5af159dcdc396056daaeadf4c7d91d42fbd7c19a"
+    },
+    "helsinki/trips-2016-07": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2016-07",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2016/2016-07.csv",
+      "months": [
+        "2016-07"
+      ],
+      "bytes": 6552762,
+      "sha256": "24ea0dc518c9f69404ba512bf4cae413c59504bed371412bce6d2378ce2fb852"
+    },
+    "helsinki/trips-2016-08": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2016-08",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2016/2016-08.csv",
+      "months": [
+        "2016-08"
+      ],
+      "bytes": 6804818,
+      "sha256": "c15bccbf1da4f23044d3d72feaec544e233ba4c131e2e45659fa25a3625829e0"
+    },
+    "helsinki/trips-2016-09": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2016-09",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2016/2016-09.csv",
+      "months": [
+        "2016-09"
+      ],
+      "bytes": 5515616,
+      "sha256": "93c9303eb0817f3b919a1fa852cc5771b79914d6b2415401429235411a1cc5c3"
+    },
+    "helsinki/trips-2016-10": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2016-10",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2016/2016-10.csv",
+      "months": [
+        "2016-10"
+      ],
+      "bytes": 3101602,
+      "sha256": "936809fe7c2ee99253f3a01166bb22641c3a7d3e682501c406d34f85589886d1"
+    },
+    "helsinki/trips-2017-05": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2017-05",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2017/2017-05.csv",
+      "months": [
+        "2017-05"
+      ],
+      "bytes": 21622360,
+      "sha256": "c001c454dd6c911aec9d93e79e6f27a31c2fb59c306427c3a5b570d1d8397ea2"
+    },
+    "helsinki/trips-2017-06": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2017-06",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2017/2017-06.csv",
+      "months": [
+        "2017-06"
+      ],
+      "bytes": 27315988,
+      "sha256": "8dc854de2f5aae5814e556070aa04c95529a19e700036cd930af7c5f733ee79d"
+    },
+    "helsinki/trips-2017-07": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2017-07",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2017/2017-07.csv",
+      "months": [
+        "2017-07"
+      ],
+      "bytes": 29206445,
+      "sha256": "333816ca31efd0c03fde3d2f5fd57121eb248717166b5efc63f2ba08850c34b3"
+    },
+    "helsinki/trips-2017-08": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2017-08",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2017/2017-08.csv",
+      "months": [
+        "2017-08"
+      ],
+      "bytes": 31310165,
+      "sha256": "9dffc3e079642599f9e9c65125b64269d53ec249ca477c70d210d081812a4f32"
+    },
+    "helsinki/trips-2017-09": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2017-09",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2017/2017-09.csv",
+      "months": [
+        "2017-09"
+      ],
+      "bytes": 20727659,
+      "sha256": "92a1efece7eb993f11cde8d1f7e849433edd0508820a1c83110f71b93b368b54"
+    },
+    "helsinki/trips-2017-10": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2017-10",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2017/2017-10.csv",
+      "months": [
+        "2017-10"
+      ],
+      "bytes": 10617245,
+      "sha256": "a2c6b9c29ff68753cfef81eb31c3cf2c0419304c25f96076e0d5d502db03874b"
+    },
+    "helsinki/trips-2018-04": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2018-04",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2018/2018-04.csv",
+      "months": [
+        "2018-04"
+      ],
+      "bytes": 18982994,
+      "sha256": "ea3690bc35492073d582a2be25e90de325c248e799144d2a66140168f09cc544"
+    },
+    "helsinki/trips-2018-05": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2018-05",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2018/2018-05.csv",
+      "months": [
+        "2018-05"
+      ],
+      "bytes": 56138782,
+      "sha256": "2318155ad7ad19b430645077b0022ac7d520bef91e402d343712ec8538d661ff"
+    },
+    "helsinki/trips-2018-06": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2018-06",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2018/2018-06.csv",
+      "months": [
+        "2018-06"
+      ],
+      "bytes": 49544951,
+      "sha256": "521da50202df4b3ea41d28481d8932b5ab844737b19b04175c1ec3792d40fbc6"
+    },
+    "helsinki/trips-2018-07": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2018-07",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2018/2018-07.csv",
+      "months": [
+        "2018-07"
+      ],
+      "bytes": 50060392,
+      "sha256": "896571059fdbb1f8d69da3fcfbf92aff9fdeed357640ce7a5aecfcb708bd1aaa"
+    },
+    "helsinki/trips-2018-08": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2018-08",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2018/2018-08.csv",
+      "months": [
+        "2018-08"
+      ],
+      "bytes": 52953553,
+      "sha256": "df8bb1ad798bedcfe299c79855db600da27d1ff68ed56c935c371b6842cfa308"
+    },
+    "helsinki/trips-2018-09": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2018-09",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2018/2018-09.csv",
+      "months": [
+        "2018-09"
+      ],
+      "bytes": 34395201,
+      "sha256": "bb20484d0d425cac74738111d3ab4eebb38e8d2109ac76d727a10ab3a45b390c"
+    },
+    "helsinki/trips-2018-10": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2018-10",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2018/2018-10.csv",
+      "months": [
+        "2018-10"
+      ],
+      "bytes": 22134041,
+      "sha256": "4108fb9080e16c489a9822b4e96a0c5759d7ebf674963951b8c8b894e2d5c792"
+    },
+    "helsinki/trips-2019-04": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2019-04",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2019/2019-04.csv",
+      "months": [
+        "2019-04"
+      ],
+      "bytes": 35997065,
+      "sha256": "dd2e632485b0d98d63b220e393300dd2a0de7e7ad241d8fa1b1037bade9487dd"
+    },
+    "helsinki/trips-2019-05": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2019-05",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2019/2019-05.csv",
+      "months": [
+        "2019-05"
+      ],
+      "bytes": 53260569,
+      "sha256": "c554d9609c3f5f363bdc67294da8f7374836a9bf85790ecbc2a8761386f7db77"
+    },
+    "helsinki/trips-2019-06": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2019-06",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2019/2019-06.csv",
+      "months": [
+        "2019-06"
+      ],
+      "bytes": 62806771,
+      "sha256": "8b6213490841279d4858a3cacf78ca7728ef39d3b563e79716e5ae4cfb84c961"
+    },
+    "helsinki/trips-2019-07": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2019-07",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2019/2019-07.csv",
+      "months": [
+        "2019-07"
+      ],
+      "bytes": 58549825,
+      "sha256": "7793570762d8af90c7e88ff1458e81fae753a7db810c760bf9d8cd60a3122f49"
+    },
+    "helsinki/trips-2019-08": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2019-08",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2019/2019-08.csv",
+      "months": [
+        "2019-08"
+      ],
+      "bytes": 60646051,
+      "sha256": "41878c9bf35d297c8dba06999c9ff351e66e387143118daa491342e901646c04"
+    },
+    "helsinki/trips-2019-09": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2019-09",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2019/2019-09.csv",
+      "months": [
+        "2019-09"
+      ],
+      "bytes": 39625206,
+      "sha256": "c8ac6d26c378d7012a6cdd93998c1f3b21658648a3d162b7715a2021959bd46d"
+    },
+    "helsinki/trips-2019-10": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2019-10",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2019/2019-10.csv",
+      "months": [
+        "2019-10"
+      ],
+      "bytes": 22905524,
+      "sha256": "31fffbe72933212e63d665475c78b15b29dcc6740149ecfee3237f2f244e9f62"
+    },
+    "helsinki/trips-2020-03": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2020-03",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2020/2020-03.csv",
+      "months": [
+        "2020-03"
+      ],
+      "bytes": 3633613,
+      "sha256": "9980b624f145c13813d54753bfe4f15d91a427175507a0c463c592b4dce6bf5c"
+    },
+    "helsinki/trips-2020-04": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2020-04",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2020/2020-04.csv",
+      "months": [
+        "2020-04"
+      ],
+      "bytes": 24547675,
+      "sha256": "a653f48797c0969d0995bfdaa0cbe058dcfa89787f6171153d735b1d6637c3cb"
+    },
+    "helsinki/trips-2020-05": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2020-05",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2020/2020-05.csv",
+      "months": [
+        "2020-05"
+      ],
+      "bytes": 40209606,
+      "sha256": "6c3055f8bb18251650a41e3cc9f133bc35264e5e1684aa702496a41d46700e46"
+    },
+    "helsinki/trips-2020-06": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2020-06",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2020/2020-06.csv",
+      "months": [
+        "2020-06"
+      ],
+      "bytes": 54169483,
+      "sha256": "45b683bff9f14a80541987a1309a4a9667dde1292a01231513a23b156da153e8"
+    },
+    "helsinki/trips-2020-07": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2020-07",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2020/2020-07.csv",
+      "months": [
+        "2020-07"
+      ],
+      "bytes": 45572408,
+      "sha256": "bf6bf95759e8bab934d4aa843c9744617282c66ef569410ebf6e2a206ee1b989"
+    },
+    "helsinki/trips-2020-08": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2020-08",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2020/2020-08.csv",
+      "months": [
+        "2020-08"
+      ],
+      "bytes": 50089574,
+      "sha256": "fbe6b961092e31e56c258defd63bafc0fcc4f13f6435bdf70f2a40050fa4bff2"
+    },
+    "helsinki/trips-2020-09": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2020-09",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2020/2020-09.csv",
+      "months": [
+        "2020-09"
+      ],
+      "bytes": 34224679,
+      "sha256": "a4ca1448ba167195ac914ceaff526cfeb8cf6823765dbe7fa1ffc9967749f636"
+    },
+    "helsinki/trips-2020-10": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2020-10",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2020/2020-10.csv",
+      "months": [
+        "2020-10"
+      ],
+      "bytes": 22703808,
+      "sha256": "fb5005d1618369e8360756d92f8aa19ec00b9946a5aba5e1b8b63b64515ab923"
+    },
+    "helsinki/trips-2021-04": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2021-04",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2021/2021-04.csv",
+      "months": [
+        "2021-04"
+      ],
+      "bytes": 48225520,
+      "sha256": "df0abe60503f7647b42321ca500b31c78c8d608e28733565496569ee46748d0a"
+    },
+    "helsinki/trips-2021-05": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2021-05",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2021/2021-05.csv",
+      "months": [
+        "2021-05"
+      ],
+      "bytes": 71669764,
+      "sha256": "fefa7b6f849058f77534a9fa730138a7538cc82e7c483e21860e700c94429a88"
+    },
+    "helsinki/trips-2021-06": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2021-06",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2021/2021-06.csv",
+      "months": [
+        "2021-06"
+      ],
+      "bytes": 107502150,
+      "sha256": "f7b0687a7c34489bd38a501cce2d238395a60ad363a7b4008f4c54208826fc63"
+    },
+    "helsinki/trips-2021-07": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2021-07",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2021/2021-07.csv",
+      "months": [
+        "2021-07"
+      ],
+      "bytes": 106184622,
+      "sha256": "a0be7104d140c19452d9fb2a7e7582fc070740b2fdb13339f218ebcd4179464d"
+    },
+    "helsinki/trips-2021-08": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2021-08",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2021/2021-08.csv",
+      "months": [
+        "2021-08"
+      ],
+      "bytes": 38307791,
+      "sha256": "19ca953f2de3fd42583ca9aeda4203122b2335898b49b0b8e0847f429cf92a03"
+    },
+    "helsinki/trips-2021-09": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2021-09",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2021/2021-09.csv",
+      "months": [
+        "2021-09"
+      ],
+      "bytes": 28114692,
+      "sha256": "e41e6aa772d272a54d0d1dce0a88f69eba7018b5dd87726bef8b21c90d4bc6ce"
+    },
+    "helsinki/trips-2021-10": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2021-10",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2021/2021-10.csv",
+      "months": [
+        "2021-10"
+      ],
+      "bytes": 17758192,
+      "sha256": "d38f9df9ab85709c8c4bbaa51d70d6b719f5c4b94274fdab73a95819d401ac65"
+    },
+    "helsinki/trips-2022-04": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2022-04",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2022/2022-04.csv",
+      "months": [
+        "2022-04"
+      ],
+      "bytes": 16341660,
+      "sha256": "3d3c679683bf784615ad9a0124589fb535ed286531072e43cc8ee391133cdcb0"
+    },
+    "helsinki/trips-2022-05": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2022-05",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2022/2022-05.csv",
+      "months": [
+        "2022-05"
+      ],
+      "bytes": 32268360,
+      "sha256": "2e972f169eb2fbe2994b830dbb8259bbf7b278b2c11e39fed9cb2f2d9cb32fdf"
+    },
+    "helsinki/trips-2022-06": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2022-06",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2022/2022-06.csv",
+      "months": [
+        "2022-06"
+      ],
+      "bytes": 42217949,
+      "sha256": "3163533a3bcf784bfee915a4672d5a76047e42c4699cd13413fc411f843f97d4"
+    },
+    "helsinki/trips-2022-07": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2022-07",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2022/2022-07.csv",
+      "months": [
+        "2022-07"
+      ],
+      "bytes": 40379473,
+      "sha256": "24c039880f38d52d58fb4c802c45027fdd9a3c3ddefc228505d5eec44edbec7e"
+    },
+    "helsinki/trips-2022-08": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2022-08",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2022/2022-08.csv",
+      "months": [
+        "2022-08"
+      ],
+      "bytes": 44327755,
+      "sha256": "d16e1021726b342d334907281715440adcdb5325b227dcd9ef0cdc80686923b0"
+    },
+    "helsinki/trips-2022-09": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2022-09",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2022/2022-09.csv",
+      "months": [
+        "2022-09"
+      ],
+      "bytes": 25729283,
+      "sha256": "c9cadfd0fed0184beca1f1b5defae86a536414fd1ac93b94a5207c8ddc0e31c4"
+    },
+    "helsinki/trips-2022-10": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2022-10",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2022/2022-10.csv",
+      "months": [
+        "2022-10"
+      ],
+      "bytes": 16477707,
+      "sha256": "b9a24cf6bce661e3bce494cf9d8edf75314da2ffa869d06889fc85416aa8037e"
+    },
+    "helsinki/trips-2023-04": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2023-04",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2023/2023-04.csv",
+      "months": [
+        "2023-04"
+      ],
+      "bytes": 23882786,
+      "sha256": "82493256c27a8c9da2830dadb8c4cd5baabaf3e60bea74d054d9c28f72550e9c"
+    },
+    "helsinki/trips-2023-05": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2023-05",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2023/2023-05.csv",
+      "months": [
+        "2023-05"
+      ],
+      "bytes": 36866606,
+      "sha256": "bbc7fe0ba81963d297a10f5117fd410225e3bc28847d585c74d1a87676b1da2a"
+    },
+    "helsinki/trips-2023-06": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2023-06",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2023/2023-06.csv",
+      "months": [
+        "2023-06"
+      ],
+      "bytes": 42310739,
+      "sha256": "d3b525ab5c28714032011d7a606f3f376d76eb72efe9a5354e2727cf5584da40"
+    },
+    "helsinki/trips-2023-07": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2023-07",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2023/2023-07.csv",
+      "months": [
+        "2023-07"
+      ],
+      "bytes": 36752298,
+      "sha256": "8e420799f5d24b00f916ba2640b80acbf5370f91ed004b628351655eb908360f"
+    },
+    "helsinki/trips-2023-08": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2023-08",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2023/2023-08.csv",
+      "months": [
+        "2023-08"
+      ],
+      "bytes": 37474077,
+      "sha256": "ca5b00b53a841f1b731f89c901ff6c48e90ea864c8493fbeeacf99d369dc88fe"
+    },
+    "helsinki/trips-2023-09": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2023-09",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2023/2023-09.csv",
+      "months": [
+        "2023-09"
+      ],
+      "bytes": 29926121,
+      "sha256": "efc46145127d055f6be4ff7dd1c3e7b361ff17f0e4cd404150b7a75e0b47471d"
+    },
+    "helsinki/trips-2023-10": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2023-10",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2023/2023-10.csv",
+      "months": [
+        "2023-10"
+      ],
+      "bytes": 16674389,
+      "sha256": "987566f76e5211364043d4730012dfba07f1a907301d35033fd460ba69437b0e"
+    },
+    "helsinki/trips-2024-04": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2024-04",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2024/2024-04.csv",
+      "months": [
+        "2024-04"
+      ],
+      "bytes": 14830116,
+      "sha256": "ec6c205ec8bacbc3e92d18baec0a0f3f51b37deef199712ea9144eb175b16081"
+    },
+    "helsinki/trips-2024-05": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2024-05",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2024/2024-05.csv",
+      "months": [
+        "2024-05"
+      ],
+      "bytes": 39512499,
+      "sha256": "39820fe62d41dab513e317b50f650c4a4326c91608a184ef25abceff713c907f"
+    },
+    "helsinki/trips-2024-06": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2024-06",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2024/2024-06.csv",
+      "months": [
+        "2024-06"
+      ],
+      "bytes": 41284777,
+      "sha256": "45b106a17e08ae8ed2454576f8b63c362aaafedbbfb2f81c516aab8f096d1840"
+    },
+    "helsinki/trips-2024-07": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2024-07",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2024/2024-07.csv",
+      "months": [
+        "2024-07"
+      ],
+      "bytes": 40054127,
+      "sha256": "fbf14a051646321f9992232c117cc5fed98dcfebf702fd1a6368f9db0bcc62e6"
+    },
+    "helsinki/trips-2024-08": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2024-08",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2024/2024-08.csv",
+      "months": [
+        "2024-08"
+      ],
+      "bytes": 43325330,
+      "sha256": "45bb98f72957c8ddb9f0ae3ca2d1ae146d02cb5983f1cc041141053ebbccb613"
+    },
+    "helsinki/trips-2024-09": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2024-09",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2024/2024-09.csv",
+      "months": [
+        "2024-09"
+      ],
+      "bytes": 30000840,
+      "sha256": "75930078c0eb88524dd3449706b88346e37cba4ad4ec9181118c716c7ca259cc"
+    },
+    "helsinki/trips-2024-10": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2024-10",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2024/2024-10.csv",
+      "months": [
+        "2024-10"
+      ],
+      "bytes": 18665699,
+      "sha256": "8e24660067608666c58bc74d0547c8e12685e3618ff34f66999e6f1615f0394d"
+    },
+    "helsinki/trips-2025-04": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2025-04",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2025/2025-04.csv",
+      "months": [
+        "2025-04"
+      ],
+      "bytes": 22003313,
+      "sha256": "e9f56be3edb7bc83ad6d8cc545ca6f047e30e95601f7214c829dc2adc6699a49"
+    },
+    "helsinki/trips-2025-05": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2025-05",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2025/2025-05.csv",
+      "months": [
+        "2025-05"
+      ],
+      "bytes": 33132112,
+      "sha256": "4c0484fb05a3c9aa4295f510ca072877312c41a2c7e40412daabe19c346cb0ac"
+    },
+    "helsinki/trips-2025-06": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2025-06",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2025/2025-06.csv",
+      "months": [
+        "2025-06"
+      ],
+      "bytes": 34075651,
+      "sha256": "1fe647e645f423805bbea4166527427579c4580fc73c85d6877891dde94b7e23"
+    },
+    "helsinki/trips-2025-07": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2025-07",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2025/2025-07.csv",
+      "months": [
+        "2025-07"
+      ],
+      "bytes": 44750359,
+      "sha256": "2875bd1fe5d3d2a0be222bee4a7dbe8f12a227a91653f8892a7695f349000419"
+    },
+    "helsinki/trips-2025-08": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2025-08",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2025/2025-08.csv",
+      "months": [
+        "2025-08"
+      ],
+      "bytes": 40965131,
+      "sha256": "e10cb5b4b1ec177738be7ca3599c023850e46f91df8fbd2d6badd021b9926956"
+    },
+    "helsinki/trips-2025-09": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2025-09",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2025/2025-09.csv",
+      "months": [
+        "2025-09"
+      ],
+      "bytes": 28730811,
+      "sha256": "e89cf59968e1b9aa9515d01541e14cab55e7416408495ae963ab5c92a45330e4"
+    },
+    "helsinki/trips-2025-10": {
+      "system": "helsinki",
+      "kind": "trips",
+      "era": "hsl",
+      "name": "trips-2025-10",
+      "url": "https://dev.hsl.fi/citybikes/od-trips-2025/2025-10.csv",
+      "months": [
+        "2025-10"
+      ],
+      "bytes": 17837512,
+      "sha256": "89db1874ccde1fb9a2e440d49c8e54ad8c64c475de13df2eabf1538f4cf95769"
+    }
+  }
+}
