@@ -35,11 +35,19 @@ def target_id(system: str, table: str, key: object) -> uuid.UUID:
     return uuid.uuid5(NAMESPACE, f"{system}:{table}:{key}")
 
 
+ASCII_WHITESPACE = " \t\n\r\f\v"
+
+
 def clean_name(text: str | None) -> str | None:
-    """Trimmed and NFC; a value that is empty once trimmed is null."""
+    """Trimmed of ASCII whitespace, then NFC; a value that is empty once trimmed is null.
+
+    ASCII only, as the spec says: `str.strip()` with no argument would also strip a no-break
+    space or an ideographic space, which the verifier's SQL does not, and the two would disagree
+    the day one appeared.
+    """
     if text is None:
         return None
-    return unicodedata.normalize("NFC", text.strip()) or None
+    return unicodedata.normalize("NFC", text.strip(ASCII_WHITESPACE)) or None
 
 
 def round_coordinate(text: str | None) -> Decimal | None:

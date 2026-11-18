@@ -37,6 +37,7 @@ def test_names_are_trimmed_and_nfc_and_nothing_else():
     assert clean_name(decomposed) == "Sörnäinen (M)"
     assert clean_name("CLARENDON ROW") == "CLARENDON ROW"
     assert clean_name(" ") is None  # the Helsinki register's city of one space
+    assert clean_name("\xa0Puotila") == "\xa0Puotila"  # ASCII whitespace only, as specified
 
 
 def test_wall_time_kinds_in_dublin():

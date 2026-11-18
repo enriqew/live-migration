@@ -22,6 +22,7 @@ dependencies = [
 dev = [
     "duckdb>=2.0.0",
     "pytest>=8.3",
+    "pytz>=2026.6",
     "ruff>=0.7",
 ]
 
