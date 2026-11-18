@@ -6,8 +6,10 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
   "aiomysql>=0.3.2",
+  "confluent-kafka>=2.6",
   "cryptography>=43",  # MySQL 8 caching_sha2_password: the first login after a restart is RSA
   "fastapi>=0.163.1",
+  "fastavro>=1.9",
   "httpx>=0.28.1",
   "psycopg-pool>=3.3.3",
   "psycopg[binary]>=3.2",
@@ -17,7 +19,11 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest>=8.3", "ruff>=0.7"]
+dev = [
+    "duckdb>=2.0.0",
+    "pytest>=8.3",
+    "ruff>=0.7",
+]
 
 [build-system]
 requires = ["hatchling>=1.25"]
