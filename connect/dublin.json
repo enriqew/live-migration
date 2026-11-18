@@ -1,0 +1,41 @@
+{
+  "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+  "tasks.max": "1",
+  "database.hostname": "legacy-a",
+  "database.port": "5432",
+  "database.user": "dublin",
+  "database.password": "dublin",
+  "database.dbname": "dublin",
+  "topic.prefix": "dublin",
+
+  "plugin.name": "pgoutput",
+  "slot.name": "live_migration_dublin",
+  "publication.name": "live_migration_dublin",
+  "publication.autocreate.mode": "filtered",
+  "table.include.list": "public.station,public.station_reading,public.rental,public.debezium_signal",
+
+  "snapshot.mode": "no_data",
+  "signal.data.collection": "public.debezium_signal",
+  "incremental.snapshot.chunk.size": "10000",
+
+  "provide.transaction.metadata": "true",
+  "decimal.handling.mode": "string",
+  "time.precision.mode": "adaptive_time_microseconds",
+  "tombstones.on.delete": "false",
+  "heartbeat.interval.ms": "10000",
+  "heartbeat.action.query": "SELECT pg_logical_emit_message(false, 'heartbeat', now()::text)",
+
+  "key.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+  "key.converter.apicurio.registry.url": "http://registry:8080/apis/registry/v3",
+  "key.converter.apicurio.registry.auto-register": "true",
+  "key.converter.apicurio.registry.find-latest": "true",
+  "value.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+  "value.converter.apicurio.registry.url": "http://registry:8080/apis/registry/v3",
+  "value.converter.apicurio.registry.auto-register": "true",
+  "value.converter.apicurio.registry.find-latest": "true",
+
+  "topic.creation.default.replication.factor": "1",
+  "topic.creation.default.partitions": "1",
+  "topic.creation.default.cleanup.policy": "delete",
+  "topic.creation.default.retention.ms": "604800000"
+}
