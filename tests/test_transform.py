@@ -132,3 +132,25 @@ def test_helsinki_station_kinds():
     stub = helsinki_station_stub("A04")
     assert (stub["kind"], stub["name"]) == ("unlisted", "A04")
     assert stub["station_id"] == helsinki_station({**base, "id": "A04"})["station_id"]
+
+
+def test_folds_step_once_per_station_in_reading_order():
+    from migration.folds import ambiguous_hours, assign
+
+    w = lambda m: datetime(2023, 10, 29, 1, m)  # noqa: E731
+    rows = [
+        (1, 10, w(0)),
+        (1, 11, w(30)),
+        (1, 12, w(0)),
+        (1, 13, w(30)),  # steps back at 12
+        (2, 20, w(10)),
+        (2, 21, w(40)),  # only one pass seen: no step
+    ]
+    folds, without_step = assign(rows)
+    assert folds == {10: 0, 11: 0, 12: 1, 13: 1, 20: 0, 21: 0}
+    assert without_step == 1
+    assert ambiguous_hours(2023, 2025) == [
+        datetime(2023, 10, 29, 1),
+        datetime(2024, 10, 27, 1),
+        datetime(2025, 10, 26, 1),
+    ]
