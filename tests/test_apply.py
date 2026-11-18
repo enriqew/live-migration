@@ -1,4 +1,4 @@
-from migration.apply import Change, Offsets, Txn, newest, position
+from migration.apply import Change, Offsets, Txn, newest, position, txn_key
 
 
 def change(row_id, pos, kind="upsert"):
@@ -47,3 +47,9 @@ def test_a_transaction_is_complete_only_with_every_counted_event():
     assert not t.complete()
     t.seen["public.station_reading"] = 1
     assert t.complete()
+
+
+def test_a_postgres_transaction_is_its_txid_whatever_lsn_each_record_carries():
+    assert txn_key("dublin", "6337:13227552704") == txn_key("dublin", "6337:13227564568")
+    gtid = "4d0375ab-e266-11f1-8a3a-ea187f2b8ab7:1015"
+    assert txn_key("helsinki", gtid) == gtid

@@ -466,6 +466,16 @@ class Txn:
         )
 
 
+def txn_key(system: str, debezium_id: str) -> str:
+    """The identity of a source transaction across its BEGIN, its events and its END.
+
+    PostgreSQL's Debezium id is `txId:LSN`, and the LSN is not the same in every record: BEGIN
+    and the data events carry one, END carries the commit's. Only `txId` identifies the
+    transaction. MySQL's id is the GTID, the same everywhere.
+    """
+    return debezium_id.split(":", 1)[0] if system == "dublin" else debezium_id
+
+
 def collection_of(topic: str) -> str:
     """'dublin.public.rental' -> 'public.rental', as Debezium names it in transaction records."""
     return topic.split(".", 1)[1]
@@ -543,7 +553,7 @@ class Service:
             return
         record, semantic = self.registry.decode(msg.value())
         if msg.topic() == self.txn_topic:
-            txn_id = record["id"]
+            txn_id = txn_key(self.system, record["id"])
             if record["status"] == "BEGIN":
                 self.finished_meta.append((tp, offset))
                 return
@@ -566,12 +576,12 @@ class Service:
             return
         ev = event(msg.topic(), msg.partition(), offset, record, semantic)
         change = to_change(msg.topic(), ev, self.folds)
-        if ev.transaction is None or ev.transaction["id"] in self.applied:
+        if ev.transaction is None or txn_key(self.system, ev.transaction["id"]) in self.applied:
             # A snapshot read, or an event of a transaction applied before a restart: nothing to
             # wait for, and the version guard decides.
             self.ready.append((tp, offset, change))
             return
-        txn_id = ev.transaction["id"]
+        txn_id = txn_key(self.system, ev.transaction["id"])
         txn = self.txns.setdefault(txn_id, Txn())
         txn.changes.append((tp, offset, change))
         txn.seen[collection_of(msg.topic())] += 1
