@@ -70,7 +70,7 @@ def load_dublin(files: list[SourceFile], raw_dir: Path, ep: Endpoints, reset: bo
         # Files in time order: the station attributes of the latest file win, and reading_id
         # follows real time across files as well as within them.
         for f in sorted(files, key=lambda f: f.months[0]):
-            stations, readings = dublin.parse(local_path(raw_dir, f), f.era)
+            stations, readings, dropped = dublin.parse(local_path(raw_dir, f), f.era, set(f.months))
             with conn.transaction(), conn.cursor() as cur:
                 cur.executemany(
                     _STATION_UPSERT,
@@ -96,7 +96,12 @@ def load_dublin(files: list[SourceFile], raw_dir: Path, ep: Endpoints, reset: bo
                             )
                         )
             total += len(readings)
-            print(f"legacy A: {f.name}: {len(readings):,} readings, {len(stations)} stations")
+            note = (
+                f", {dropped:,} rows outside {f.months[0]}..{f.months[-1]} dropped"
+                if dropped
+                else ""
+            )
+            print(f"legacy A: {f.name}: {len(readings):,} readings, {len(stations)} stations{note}")
     return total
 
 

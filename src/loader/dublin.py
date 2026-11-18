@@ -8,6 +8,7 @@ are inserted in real-time order per station, and this module is where that order
 - GBFS rows carry UTC, so real order is known: they are sorted by (UTC time, station).
 - JCDecaux rows carry local time only, so the file order is the only witness. It is kept, and
   checked: per station, poll time may step backwards only inside an autumn transition hour.
+- Rows outside the months a file was assigned are dropped (see `parse`).
 """
 
 from __future__ import annotations
@@ -89,11 +90,17 @@ def is_autumn_repeat(local: datetime) -> bool:
     return first > second
 
 
-def parse_jcdecaux(path: Path) -> tuple[dict[int, Station], list[Reading]]:
+def parse_jcdecaux(
+    path: Path, months: set[str] | None = None
+) -> tuple[dict[int, Station], list[Reading], int]:
     stations: dict[int, Station] = {}
     readings: list[Reading] = []
     last_poll: dict[int, datetime] = {}
+    dropped = 0
     for r in _rows(path):
+        if months is not None and r["TIME"][:7] not in months:
+            dropped += 1
+            continue
         number = int(r["STATION_ID"])
         stations[number] = Station(
             number=number,
@@ -125,13 +132,19 @@ def parse_jcdecaux(path: Path) -> tuple[dict[int, Station], list[Reading]]:
                 is_returning=None,
             )
         )
-    return stations, readings
+    return stations, readings, dropped
 
 
-def parse_gbfs(path: Path) -> tuple[dict[int, Station], list[Reading]]:
+def parse_gbfs(
+    path: Path, months: set[str] | None = None
+) -> tuple[dict[int, Station], list[Reading], int]:
     stations: dict[int, Station] = {}
     rows = []
+    dropped = 0
     for r in _rows(path):
+        if months is not None and r["LAST_REPORTED"][:7] not in months:
+            dropped += 1
+            continue
         number = int(r["STATION_ID"])
         stations[number] = Station(
             number=number,
@@ -156,12 +169,21 @@ def parse_gbfs(path: Path) -> tuple[dict[int, Station], list[Reading]]:
         )
         for utc, number, r in rows
     ]
-    return stations, readings
+    return stations, readings, dropped
 
 
-def parse(path: Path, era: str) -> tuple[dict[int, Station], list[Reading]]:
+def parse(
+    path: Path, era: str, months: set[str] | None = None
+) -> tuple[dict[int, Station], list[Reading], int]:
+    """Stations, readings, and how many rows fell outside `months` and were dropped.
+
+    A file's name is not proof of its content: the quarterly file named 2021-10-01 to 2022-01-01
+    also carries all of 2022-01-01, which the January file carries again. Rows are kept only for
+    the months the catalog assigned the file, read from the file's own clock (local poll time for
+    JCDecaux, UTC for GBFS), so no month is ever loaded twice.
+    """
     if era == "jcdecaux":
-        return parse_jcdecaux(path)
+        return parse_jcdecaux(path, months)
     if era == "gbfs":
-        return parse_gbfs(path)
+        return parse_gbfs(path, months)
     raise ValueError(f"unknown Dublin era {era!r}")

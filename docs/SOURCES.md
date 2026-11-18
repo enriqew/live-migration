@@ -43,6 +43,11 @@ What the samples showed (2022-06, 2023-10, 2025-03, 2025-10):
 - **Two eras overlap:** the last quarterly file (2021-10 to 2022-01, 5 min) and the first monthly
   files (2021-10 to 2021-12, 30 min) cover the same three months. The load takes one of them, by a
   rule written down, never both.
+- **A file's name is not its content.** The quarterly file named 2021-10-01 to 2022-01-01 also
+  carries all of 2022-01-01 (31,968 rows), which the January file carries again. Found by the
+  full load, as stations whose reports went back a day at that boundary. Every file is now cut to
+  the months it was assigned, on its own clock; this is the only file in the window with rows
+  outside them.
 
 ## Helsinki and Espoo: city bike trips
 
@@ -72,6 +77,9 @@ What the samples showed (2016-07, 2025-07, 2025-10):
   other.
 - **Defects kept on purpose:** 536 null distances and 26 negative distances in 2025-07; 10 trips
   returning before they depart in 2025-10; one departure written as a bare date (`2025-10-01`).
+- **What the full load added** (all 70 files, 27,041,535 trips): 209,264 trips with no duration,
+  665 with no departure station and 360 with no return station, all from 2017 onwards; and from
+  2018, distances in centimetres (`1941.67`) in about 14,000 trips. All of it is kept as published.
 
 ### Helsinki and Espoo: stations
 
