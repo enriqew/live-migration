@@ -113,6 +113,14 @@ services:
     depends_on:
       legacy-b: {condition: service_healthy}
 
+  gateway:
+    # Where clients connect and where the cutover switches traffic (src/gateway/app.py).
+    build: .
+    command: ["uvicorn", "gateway.app:app", "--host", "0.0.0.0", "--port", "8000"]
+    restart: unless-stopped
+    ports: ["8000:8000"]
+    depends_on: [api-a, api-b]
+
   kafka:
     # One broker in KRaft mode, acting as its own controller. CDC topics keep everything for a
     # week: a migration must be able to replay from the start of its snapshot.
