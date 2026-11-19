@@ -10,9 +10,13 @@ Every step is timed and gated, and the timeline is written to data/runs/cutover-
    legacy system committed before the fence is in Kafka too;
 4. drain: the end offsets of every CDC topic are read at that moment, and the cutover waits until
    the apply services have committed past them in the target;
-5. hand over: the legacy APIs' recent idempotency keys are copied into the target, and the target's
+5. reverse: the forward connectors are paused, so the legacy systems' changes stop flowing to
+   the target, and the reverse replication's slot is created on the target, so it starts at
+   exactly this point and carries only what the unified API writes from here on. The reverse
+   connector itself is registered after the release: it reads the slot from where it was made;
+6. hand over: the legacy APIs' recent idempotency keys are copied into the target, and the target's
    key sequences are set past each legacy maximum;
-6. route and release: the gateway sends each system to the unified API and lets the held requests
+7. route and release: the gateway sends each system to the unified API and lets the held requests
    through.
 
 There is no row count inside the fence. The first version had one, and counting 49 million rows
@@ -36,6 +40,7 @@ import psycopg
 import pymysql
 from confluent_kafka import Consumer, TopicPartition
 
+from loader.cdc import _http as connect_api
 from migration.decode import Registry
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -170,6 +175,31 @@ def await_markers(markers: dict[str, str], timeout_s: float = 60) -> None:
         raise TimeoutError(f"markers not seen in Kafka: {pending}")
 
 
+def pause_forward() -> None:
+    for name in TOPICS:
+        connect_api("PUT", f"/connectors/{name}/pause")
+    for _ in range(100):
+        states = [
+            connect_api("GET", f"/connectors/{n}/status")[1]["connector"]["state"] for n in TOPICS
+        ]
+        if all(s == "PAUSED" for s in states):
+            return
+        time.sleep(0.05)
+    raise TimeoutError("forward connectors did not pause")
+
+
+def create_reverse_slot(target) -> str:
+    lsn = target.execute(
+        "SELECT lsn FROM pg_create_logical_replication_slot('reverse_fleet', 'pgoutput')"
+    ).fetchone()[0]
+    return str(lsn)
+
+
+def register_reverse() -> int:
+    config = json.loads((ROOT / "connect" / "fleet.json").read_text(encoding="utf8"))
+    return connect_api("PUT", "/connectors/fleet/config", config)[0]
+
+
 def hand_over(target) -> dict:
     """Recent idempotency keys and the key sequences, legacy to target."""
     with psycopg.connect(LEGACY_A) as a:
@@ -223,6 +253,10 @@ def main() -> None:
     target = psycopg.connect(TARGET, autocommit=True)
     result = {"ok": False}
     try:
+        if target.execute(
+            "SELECT 1 FROM pg_replication_slots WHERE slot_name = 'reverse_fleet'"
+        ).fetchone():
+            raise RuntimeError("a reverse slot already exists: clean up the previous run first")
         current = lag(consumer, target)
         tl.step("gate.lag", messages=current)
         if current > args.max_lag:
@@ -251,16 +285,32 @@ def main() -> None:
             time.sleep(0.05)
         tl.step("drained")
 
+        pause_forward()
+        slot_lsn = create_reverse_slot(target)
+        tl.step("reverse_ready", slot_lsn=slot_lsn)
+
         handed = hand_over(target)
         tl.step("handed_over", **handed)
 
         post("/admin/route", UNIFIED)
         released = post("/admin/release")
         tl.step("released", **released)
+        tl.step("reverse_registered", status=register_reverse())
         result = {"ok": True}
     except Exception as e:
         # Never leave clients held: on any failure the fence opens on the legacy upstreams.
         result = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+        try:
+            # Undo what the reverse step did, if it got that far, before letting clients go.
+            for name in TOPICS:
+                connect_api("PUT", f"/connectors/{name}/resume")
+            target.execute(
+                "SELECT pg_drop_replication_slot(slot_name) FROM pg_replication_slots "
+                "WHERE slot_name = 'reverse_fleet' AND NOT active"
+            )
+            post("/admin/route", {"dublin": "http://api-a:8000", "helsinki": "http://api-b:8000"})
+        except Exception as e3:  # noqa: BLE001
+            tl.step("undo_failed", error=str(e3))
         try:
             released = post("/admin/release")
             tl.step("aborted_and_released_to_legacy", **released)
