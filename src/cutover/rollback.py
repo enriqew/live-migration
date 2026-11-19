@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import time
+import urllib.request
 import uuid
 from datetime import UTC, datetime
 
@@ -45,7 +46,7 @@ MARKER_TOPIC = "fleet.migration.rollback_marker"
 LEGACY = {"dublin": "http://api-a:8000", "helsinki": "http://api-b:8000"}
 
 
-def await_marker(marker: str, timeout_s: float = 60) -> None:
+def await_marker(marker: str, timeout_s: float = 10) -> None:
     registry = Registry(REGISTRY)
     consumer = Consumer(
         {
@@ -141,6 +142,25 @@ def stop_reverse(target) -> None:
     raise TimeoutError("reverse slot still active")
 
 
+def preconditions(target) -> None:
+    """Checked before the fence: a rollback that cannot complete must not hold anyone."""
+    with urllib.request.urlopen("http://localhost:8000/admin/state", timeout=10) as resp:
+        upstreams = json.load(resp)["upstreams"]
+    if not all(url.startswith("http://unified") for url in upstreams.values()):
+        raise RuntimeError(f"traffic is not on the unified API: {upstreams}")
+    status, body = connect_api("GET", "/connectors/fleet/status")
+    if (
+        status != 200
+        or body["connector"]["state"] != "RUNNING"
+        or any(t["state"] != "RUNNING" for t in body["tasks"])
+    ):
+        raise RuntimeError(f"the reverse connector is not running: {status} {body}")
+    if not target.execute(
+        "SELECT 1 FROM pg_replication_slots WHERE slot_name = 'reverse_fleet'"
+    ).fetchone():
+        raise RuntimeError("no reverse slot")
+
+
 def main() -> None:
     run_dir = ROOT / "data" / "runs" / f"rollback-{datetime.now(UTC):%Y%m%dT%H%M%SZ}"
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -148,8 +168,12 @@ def main() -> None:
     consumer = Consumer({"bootstrap.servers": KAFKA, "group.id": "rollback-watermarks"})
     target = psycopg.connect(TARGET, autocommit=True)
     result = {"ok": False}
+    fenced = False
     try:
+        preconditions(target)
+        tl.step("preconditions")
         fence = post("/admin/fence")
+        fenced = True
         tl.step("fence", **fence)
 
         marker = f"rollback-{uuid.uuid4()}"
@@ -181,8 +205,9 @@ def main() -> None:
     except Exception as e:
         result = {"ok": False, "error": f"{type(e).__name__}: {e}"}
         try:
-            released = post("/admin/release")  # still on the unified API: nothing was lost
-            tl.step("aborted_and_released_to_unified", **released)
+            if fenced:
+                released = post("/admin/release")  # still on the unified API: nothing lost
+                tl.step("aborted_and_released_to_unified", **released)
         except Exception as e2:  # noqa: BLE001
             tl.step("release_failed", error=str(e2))
     finally:

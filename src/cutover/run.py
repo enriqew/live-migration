@@ -142,7 +142,7 @@ def write_markers() -> dict[str, str]:
     return markers
 
 
-def await_markers(markers: dict[str, str], timeout_s: float = 60) -> None:
+def await_markers(markers: dict[str, str], timeout_s: float = 10) -> None:
     registry = Registry(REGISTRY)
     consumer = Consumer(
         {
@@ -252,6 +252,7 @@ def main() -> None:
     consumer = Consumer({"bootstrap.servers": KAFKA, "group.id": "cutover-watermarks"})
     target = psycopg.connect(TARGET, autocommit=True)
     result = {"ok": False}
+    fenced = False
     try:
         if target.execute(
             "SELECT 1 FROM pg_replication_slots WHERE slot_name = 'reverse_fleet'"
@@ -263,6 +264,7 @@ def main() -> None:
             raise RuntimeError(f"lag {current} above {args.max_lag}: not cutting over")
 
         fence = post("/admin/fence")
+        fenced = True
         tl.step("fence", **fence)
 
         markers = write_markers()
@@ -308,7 +310,10 @@ def main() -> None:
                 "SELECT pg_drop_replication_slot(slot_name) FROM pg_replication_slots "
                 "WHERE slot_name = 'reverse_fleet' AND NOT active"
             )
-            post("/admin/route", {"dublin": "http://api-a:8000", "helsinki": "http://api-b:8000"})
+            if fenced:
+                post(
+                    "/admin/route", {"dublin": "http://api-a:8000", "helsinki": "http://api-b:8000"}
+                )
         except Exception as e3:  # noqa: BLE001
             tl.step("undo_failed", error=str(e3))
         try:
