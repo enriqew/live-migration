@@ -31,7 +31,7 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/loader", "src/legacy_api", "src/generator", "src/migration", "src/verifier", "src/gateway", "src/unified_api"]
+packages = ["src/loader", "src/legacy_api", "src/generator", "src/migration", "src/verifier", "src/gateway", "src/unified_api", "src/cutover"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
