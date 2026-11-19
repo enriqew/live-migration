@@ -558,18 +558,33 @@ class Service:
                 "fetch.max.bytes": 64 * 1024 * 1024,
             }
         )
-        meta = consumer.list_topics(timeout=10)
-        assignment = []
-        for topic in [*self.data_topics, self.txn_topic]:
-            if topic not in meta.topics:
-                continue
-            for p in meta.topics[topic].partitions:
-                assignment.append(
-                    TopicPartition(topic, p, stored.get((topic, p), OFFSET_BEGINNING))
-                )
-        consumer.assign(assignment)
-        print(f"assigned {len(assignment)} partitions; resuming {len(stored)} from the target")
+        self.stored = stored
+        self.assigned: set[tuple[str, int]] = set()
+        consumer.assign([])
+        self.refresh(consumer)
+        print(f"resuming {len(stored)} partitions from the target")
         return consumer
+
+    def refresh(self, consumer: Consumer) -> None:
+        """Assign every partition of the topics this service reads, as the topics appear.
+
+        Debezium creates a table's topic with its first event. A service started while a table
+        was still empty would otherwise never read it, and every transaction touching that table
+        would wait for events it never receives (found on 2026-11-19: the rentals of an emptied
+        Dublin, 2,967 transactions open).
+        """
+        meta = consumer.list_topics(timeout=10).topics
+        new = []
+        for topic in [*self.data_topics, self.txn_topic]:
+            if topic in meta and meta[topic].error is None:
+                for p in meta[topic].partitions:
+                    if (topic, p) not in self.assigned:
+                        self.assigned.add((topic, p))
+                        offset = self.stored.get((topic, p), OFFSET_BEGINNING)
+                        new.append(TopicPartition(topic, p, offset))
+        if new:
+            consumer.incremental_assign(new)
+            print(f"assigned {[f'{t.topic}/{t.partition}' for t in new]}", flush=True)
 
     def handle(self, msg) -> None:
         tp, offset = (msg.topic(), msg.partition()), msg.offset()
@@ -646,7 +661,11 @@ class Service:
         last_report = last_flush = time.monotonic()
         applied_at_report = 0
         try:
+            last_refresh = time.monotonic()
             while not self.stop:
+                if time.monotonic() - last_refresh > 2:
+                    self.refresh(consumer)
+                    last_refresh = time.monotonic()
                 msgs = consumer.consume(num_messages=self.batch, timeout=0.5)
                 for m in msgs:
                     if m.error():
