@@ -182,8 +182,9 @@ def main() -> None:
     p.add_argument("--seed", type=int, default=1)
     p.add_argument("--run-id")
     p.add_argument("--share-dublin", type=float, default=0.5)
-    p.add_argument("--dublin", default="http://127.0.0.1:8001")
-    p.add_argument("--helsinki", default="http://127.0.0.1:8002")
+    # Through the gateway, which is where the cutover switches traffic.
+    p.add_argument("--dublin", default="http://127.0.0.1:8000/dublin")
+    p.add_argument("--helsinki", default="http://127.0.0.1:8000/helsinki")
     p.add_argument("--max-in-flight", type=int, default=200)
     p.add_argument("--request-timeout", type=float, default=5.0)
     p.add_argument("--deadline", type=float, default=30.0, help="give up on an op after this")
