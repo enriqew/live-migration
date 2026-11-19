@@ -252,7 +252,12 @@ def main() -> None:
         print(f"spec {name}: {time.monotonic() - step:.0f} s", flush=True)
     timings["spec_s"] = round(time.monotonic() - t1, 1)
     t2 = time.monotonic()
-    report = {"tables": {t: compare(con, t) for t in TABLES}, "quarantine": compare_quarantine(con)}
+    report = {"tables": {}}
+    for t in TABLES:
+        step = time.monotonic()
+        report["tables"][t] = compare(con, t)
+        print(f"compared {t}: {time.monotonic() - step:.0f} s", flush=True)
+    report["quarantine"] = compare_quarantine(con)
     timings["compare_s"] = round(time.monotonic() - t2, 1)
     report["timings"] = timings
     clean = (
