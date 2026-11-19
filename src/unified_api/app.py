@@ -84,6 +84,20 @@ async def idempotent(key, method, path, body, work):
         return response
 
 
+async def _key(cur, target_table: str, system: str, legacy_table: str, legacy_key) -> None:
+    """Record which legacy row a target row is, for the reverse replication of a rollback."""
+    await cur.execute(
+        "INSERT INTO migration.legacy_key VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING",
+        (
+            tf.target_id(system, legacy_table, legacy_key),
+            target_table,
+            system,
+            legacy_table,
+            str(legacy_key),
+        ),
+    )
+
+
 async def _insert(cur, table: str, row: dict) -> None:
     cols = list(row)
     await cur.execute(
@@ -139,6 +153,7 @@ async def _reading(cur, number: int, last: dict, bikes: int, free: int, now: dat
     row = tf.dublin_reading(legacy, {})
     if isinstance(row, tf.Quarantine):
         raise HTTPException(503, f"reading refused by the spec: {row.rule}")
+    await _key(cur, "station_status", "dublin", "station_reading", reading_id)
     await _insert(cur, "station_status", row)
     return reading_id
 
@@ -177,6 +192,7 @@ async def start_rental(body: RentalStart, idempotency_key: str | None = Header(N
         )
         if isinstance(trip, tf.Quarantine):
             raise HTTPException(503, f"rental refused by the spec: {trip.rule}")
+        await _key(cur, "trip", "dublin", "rental", rental_id)
         await _insert(cur, "trip", trip)
         await _reading(
             cur,
@@ -228,6 +244,7 @@ async def return_rental(
         )
         if isinstance(trip, tf.Quarantine):
             raise HTTPException(503, f"rental refused by the spec: {trip.rule}")
+        await _key(cur, "trip", "dublin", "rental", rental_id)
         await cur.execute(
             "UPDATE fleet.trip SET return_station_id = %s, returned_at = %s, duration_s = %s, "
             "flags = %s WHERE trip_id = %s",
@@ -256,6 +273,7 @@ async def return_rental(
 @dublin.delete("/rentals/{rental_id}")
 async def erase_rental(rental_id: int, idempotency_key: str | None = Header(None)):
     async def work(cur):
+        await _key(cur, "trip", "dublin", "rental", rental_id)
         await cur.execute(
             "DELETE FROM fleet.trip WHERE trip_id = %s RETURNING trip_id",
             (tf.target_id("dublin", "rental", rental_id),),
@@ -272,6 +290,7 @@ async def change_station(
     number: int, body: StationChange, idempotency_key: str | None = Header(None)
 ):
     async def work(cur):
+        await _key(cur, "station", "dublin", "station", number)
         await cur.execute(
             "UPDATE fleet.station SET name = COALESCE(%s, name), capacity = COALESCE(%s, capacity) "
             "WHERE station_id = %s RETURNING name, capacity",
@@ -361,6 +380,7 @@ async def trip_done(body: TripDone, idempotency_key: str | None = Header(None)):
         )
         if isinstance(trip, tf.Quarantine):
             raise HTTPException(503, f"trip refused by the spec: {trip.rule}")
+        await _key(cur, "trip", "helsinki", "matka", trip_id)
         await _insert(cur, "trip", trip)
         return {"id": trip_id}
 
@@ -394,6 +414,7 @@ async def correct_trip(
             values.append(None if d < 0 else d)
         sets.append("flags = %s")
         values.append(sorted(flags))
+        await _key(cur, "trip", "helsinki", "matka", trip_id)
         await cur.execute(
             f"UPDATE fleet.trip SET {', '.join(sets)} WHERE trip_id = %s", (*values, tid)
         )
@@ -406,6 +427,7 @@ async def correct_trip(
 @helsinki.delete("/matkat/{trip_id}")
 async def erase_trip(trip_id: int, idempotency_key: str | None = Header(None)):
     async def work(cur):
+        await _key(cur, "trip", "helsinki", "matka", trip_id)
         await cur.execute(
             "DELETE FROM fleet.trip WHERE trip_id = %s RETURNING trip_id",
             (tf.target_id("helsinki", "matka", trip_id),),
@@ -426,6 +448,7 @@ async def change_asema(
         if not changes:
             raise HTTPException(422, "nothing to change")
         await _asema(cur, station_id)
+        await _key(cur, "station", "helsinki", "asema", station_id)
         await cur.execute(
             "UPDATE fleet.station SET name = COALESCE(%s, name), capacity = COALESCE(%s, capacity) "
             "WHERE station_id = %s",

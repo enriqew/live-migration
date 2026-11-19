@@ -116,3 +116,29 @@ CREATE TABLE migration.api_idempotency (
 CREATE SEQUENCE migration.seq_dublin_rental;
 CREATE SEQUENCE migration.seq_dublin_reading;
 CREATE SEQUENCE migration.seq_helsinki_matka;
+
+-- The reverse replication, during the rollback window after the cutover.
+-- Every row the unified API touches has its legacy key recorded here, in the same transaction:
+-- a target id is a hash and cannot be read backwards, and a delete carries only the id.
+CREATE TABLE migration.legacy_key (
+    row_id        uuid PRIMARY KEY,
+    target_table  text NOT NULL,
+    system        text NOT NULL,
+    legacy_table  text NOT NULL,
+    legacy_key    text NOT NULL
+);
+CREATE TABLE migration.reverse_offset (
+    topic       text    NOT NULL,
+    partition   integer NOT NULL,
+    next_offset bigint  NOT NULL,
+    PRIMARY KEY (topic, partition)
+);
+-- Written by the rollback inside its fence. Captured with the fleet tables, so once it is in Kafka
+-- everything the unified API committed before the fence is in Kafka too.
+CREATE TABLE migration.rollback_marker (
+    id          text PRIMARY KEY,
+    written_at  timestamptz NOT NULL DEFAULT now()
+);
+-- The tables the reverse connector reads. The slot is created at the cutover, inside the fence.
+CREATE PUBLICATION reverse_fleet FOR TABLE fleet.station, fleet.station_status, fleet.trip,
+    migration.rollback_marker;
