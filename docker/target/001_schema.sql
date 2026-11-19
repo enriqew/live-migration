@@ -100,3 +100,19 @@ CREATE TABLE migration.applied_txn (
     applied_at  timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (source, txn_id)
 );
+
+-- The unified API, after the cutover. Its idempotency record takes in the legacy APIs' recent
+-- keys at the cutover, so a retry of a write that landed on a legacy system is recognised here.
+CREATE TABLE migration.api_idempotency (
+    key           text PRIMARY KEY,
+    request_hash  text NOT NULL,
+    response      jsonb,
+    created_at    timestamptz NOT NULL DEFAULT now()
+);
+
+-- Legacy-compatible keys for rows the unified API creates, so that every target id is still
+-- uuid5(<system>:<table>:<legacy key>) and a rollback can write the same row back. Set past each
+-- legacy maximum by the cutover script, once the legacy systems are fenced.
+CREATE SEQUENCE migration.seq_dublin_rental;
+CREATE SEQUENCE migration.seq_dublin_reading;
+CREATE SEQUENCE migration.seq_helsinki_matka;
