@@ -241,10 +241,15 @@ def main() -> None:
             )
     timings["copy_s"] = round(time.monotonic() - t0, 1)
     t1 = time.monotonic()
-    con.execute(spec.MACROS)
-    con.execute(spec.TZ_HOURS)
-    con.execute(spec.DUBLIN)
-    con.execute(spec.HELSINKI)
+    for name, sql in (
+        ("macros", spec.MACROS),
+        ("tz_hours", spec.TZ_HOURS),
+        ("dublin", spec.DUBLIN),
+        ("helsinki", spec.HELSINKI),
+    ):
+        step = time.monotonic()
+        con.execute(sql)
+        print(f"spec {name}: {time.monotonic() - step:.0f} s", flush=True)
     timings["spec_s"] = round(time.monotonic() - t1, 1)
     t2 = time.monotonic()
     report = {"tables": {t: compare(con, t) for t in TABLES}, "quarantine": compare_quarantine(con)}
