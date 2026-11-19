@@ -10,13 +10,16 @@ Every step is timed and gated, and the timeline is written to data/runs/cutover-
    legacy system committed before the fence is in Kafka too;
 4. drain: the end offsets of every CDC topic are read at that moment, and the cutover waits until
    the apply services have committed past them in the target;
-5. check: row counts, legacy against target, per table. This is the gate that fits inside the
-   pause; the full hash verification runs after the release, against legacy systems that no longer
-   change, and its result is part of the run;
-6. hand over: the legacy APIs' recent idempotency keys are copied into the target, and the target's
+5. hand over: the legacy APIs' recent idempotency keys are copied into the target, and the target's
    key sequences are set past each legacy maximum;
-7. route and release: the gateway sends each system to the unified API and lets the held requests
+6. route and release: the gateway sends each system to the unified API and lets the held requests
    through.
+
+There is no row count inside the fence. The first version had one, and counting 49 million rows
+took 19 seconds of a 20.7-second pause; the 818 requests held behind it then arrived at once and
+took the client down with timeouts. Having applied everything up to the marker is the guarantee
+the switch needs, and it is checked inside the fence; comparing the data is the verifier's job,
+outside it.
 """
 
 from __future__ import annotations
@@ -167,48 +170,6 @@ def await_markers(markers: dict[str, str], timeout_s: float = 60) -> None:
         raise TimeoutError(f"markers not seen in Kafka: {pending}")
 
 
-def counts() -> dict[str, tuple[int, int]]:
-    with psycopg.connect(LEGACY_A) as a, psycopg.connect(TARGET) as t:
-        q = lambda c, s: c.execute(s).fetchone()[0]  # noqa: E731
-        b = helsinki()
-        with b.cursor() as cur:
-            cur.execute("SELECT (SELECT count(*) FROM asema), (SELECT count(*) FROM matka)")
-            asema, matka = cur.fetchone()
-        b.close()
-        return {
-            "dublin.station": (
-                q(a, "SELECT count(*) FROM station"),
-                q(t, "SELECT count(*) FROM fleet.station WHERE system_code = 'dublin'"),
-            ),
-            "dublin.station_reading": (
-                q(a, "SELECT count(*) FROM station_reading"),
-                q(t, "SELECT count(*) FROM fleet.station_status")
-                + q(
-                    t,
-                    "SELECT count(*) FROM migration.quarantine "
-                    "WHERE legacy_table = 'station_reading'",
-                ),
-            ),
-            "dublin.rental": (
-                q(a, "SELECT count(*) FROM rental"),
-                q(t, "SELECT count(*) FROM fleet.trip WHERE system_code = 'dublin'"),
-            ),
-            "helsinki.asema": (
-                asema,
-                q(
-                    t,
-                    "SELECT count(*) FROM fleet.station WHERE "
-                    "system_code = 'helsinki' AND kind <> 'unlisted'",
-                ),
-            ),
-            "helsinki.matka": (
-                matka,
-                q(t, "SELECT count(*) FROM fleet.trip WHERE system_code = 'helsinki'")
-                + q(t, "SELECT count(*) FROM migration.quarantine WHERE legacy_table = 'matka'"),
-            ),
-        }
-
-
 def hand_over(target) -> dict:
     """Recent idempotency keys and the key sequences, legacy to target."""
     with psycopg.connect(LEGACY_A) as a:
@@ -289,12 +250,6 @@ def main() -> None:
                 raise TimeoutError(f"apply did not drain: {behind}")
             time.sleep(0.05)
         tl.step("drained")
-
-        c = counts()
-        mismatched = {k: v for k, v in c.items() if v[0] != v[1]}
-        tl.step("checked", counts=c)
-        if mismatched:
-            raise RuntimeError(f"counts differ: {mismatched}")
 
         handed = hand_over(target)
         tl.step("handed_over", **handed)
