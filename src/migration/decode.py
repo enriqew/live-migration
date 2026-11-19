@@ -17,6 +17,7 @@ import io
 import json
 import struct
 import urllib.request
+import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
@@ -117,6 +118,12 @@ def _convert(value, semantic: str | None):
         return EPOCH + timedelta(microseconds=value)
     if semantic == "io.debezium.time.Timestamp":
         return EPOCH + timedelta(milliseconds=value)
+    if semantic == "io.debezium.time.ZonedTimestamp":
+        # A timestamptz, read from the target by the reverse connector: ISO 8601 text with its
+        # offset, an instant rather than a wall clock.
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if semantic == "io.debezium.data.Uuid":
+        return uuid.UUID(value)
     return value
 
 
