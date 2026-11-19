@@ -122,8 +122,16 @@ async def run(args) -> dict:
                     world.open_rentals.append(data["rental_id"])
                 elif op.on_success == "own_trip":
                     world.own_trips.append(data["id"])
-            elif outcome.result != ACCEPTED and op.rental is not None:
-                world.open_rentals.append(op.rental)
+            if op.rental is not None:
+                # A return that landed moves its rental to the returned list; one that did not,
+                # and an erase that did not, put the rental back where it was taken from.
+                if op.kind == "return":
+                    target = (
+                        world.returned_rentals if outcome.result == ACCEPTED else world.open_rentals
+                    )
+                    target.append(op.rental)
+                elif op.kind == "erase" and outcome.result != ACCEPTED:
+                    world.returned_rentals.append(op.rental)
             outcomes.append(outcome)
 
         t0_wall, t0 = time.time(), time.monotonic()

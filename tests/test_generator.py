@@ -39,3 +39,12 @@ def test_no_more_than_five_percent_of_stations_are_ever_out_of_service():
         stream.next()
         worst = max(worst, len(w.out_of_service))
     assert 0 < worst <= 5
+
+
+def test_an_erase_only_ever_takes_a_rental_already_returned():
+    w = World(dublin_stations=[1, 2], helsinki_stations=["043"], helsinki_max_trip_id=1)
+    w.open_rentals.extend(range(100, 120))
+    w.returned_rentals.extend(range(500, 520))
+    stream = OpStream(9, "run", w, share_dublin=1.0)
+    erases = [o for o in (stream.next() for _ in range(2000)) if o.kind == "erase"]
+    assert erases and all(500 <= o.rental < 520 for o in erases)

@@ -32,13 +32,17 @@ class World:
     helsinki_stations: list[str]
     helsinki_max_trip_id: int
     open_rentals: list[int] = field(default_factory=list)
+    returned_rentals: list[int] = field(default_factory=list)
     own_trips: list[int] = field(default_factory=list)
     out_of_service: set[int] = field(default_factory=set)
 
 
 # Relative weights. Inserts dominate, as in the real systems; updates and deletes are rare but
 # always present, because a migration that only ever sees inserts proves very little.
-DUBLIN_MIX = {"rent": 45, "return": 40, "service": 6, "rename": 2, "capacity": 2, "erase": 5}
+# Rents and returns balance, and an erasure only ever removes a rental already returned: erasing
+# one still out would take its bike out of the city for good, and over a run of hours Dublin
+# would run out of bikes (it did, on 2026-11-18).
+DUBLIN_MIX = {"rent": 43, "return": 43, "service": 6, "rename": 2, "capacity": 2, "erase": 4}
 HELSINKI_MIX = {"trip": 80, "correct": 9, "erase": 5, "rename": 3, "capacity": 3}
 
 
@@ -70,7 +74,9 @@ class OpStream:
     def _dublin(self) -> Op:
         w, rng = self.world, self.rng
         kind = self._pick(DUBLIN_MIX)
-        if kind in ("return", "erase") and not w.open_rentals:
+        if (kind == "return" and not w.open_rentals) or (
+            kind == "erase" and not w.returned_rentals
+        ):
             kind = "rent"
         station = rng.choice(w.dublin_stations)
         match kind:
@@ -91,7 +97,7 @@ class OpStream:
                 op.rental = rental
                 return op
             case "erase":
-                rental = w.open_rentals.pop(rng.randrange(len(w.open_rentals)))
+                rental = w.returned_rentals.pop(rng.randrange(len(w.returned_rentals)))
                 op = self._op("dublin", kind, "DELETE", f"/rentals/{rental}", None)
                 op.rental = rental
                 return op
