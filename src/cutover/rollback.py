@@ -13,7 +13,8 @@ like the cutover, and written to data/runs/rollback-<ts>/rollback.json.
    sequence moves past the keys the unified API created;
 6. resume the forward connectors: they carry the reverse replication's own writes to the target,
    where they change nothing, since the target already holds those values;
-7. route and release: the gateway sends each system to its legacy API again.
+7. open the legacy APIs to writes again, then route and release: the gateway sends each
+   system to its legacy API again.
 """
 
 from __future__ import annotations
@@ -37,6 +38,7 @@ from cutover.run import (
     Timeline,
     connect_api,
     helsinki,
+    legacy_writes,
     post,
 )
 from migration.decode import Registry
@@ -198,6 +200,7 @@ def main() -> None:
             connect_api("PUT", f"/connectors/{name}/resume")
         tl.step("forward_resumed")
 
+        legacy_writes(True)
         post("/admin/route", LEGACY)
         released = post("/admin/release")
         tl.step("released", **released)

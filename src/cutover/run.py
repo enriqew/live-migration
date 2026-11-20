@@ -14,9 +14,11 @@ Every step is timed and gated, and the timeline is written to data/runs/cutover-
    the target, and the reverse replication's slot is created on the target, so it starts at
    exactly this point and carries only what the unified API writes from here on. The reverse
    connector itself is registered after the release: it reads the slot from where it was made;
-6. hand over: the legacy APIs' recent idempotency keys are copied into the target, and the target's
+6. close the legacy APIs to writes: anything that reaches them from now on, past the gateway,
+   is answered 503 and retried by its client through the gateway;
+7. hand over: the legacy APIs' recent idempotency keys are copied into the target, and the target's
    key sequences are set past each legacy maximum;
-7. route and release: the gateway sends each system to the unified API and lets the held requests
+8. route and release: the gateway sends each system to the unified API and lets the held requests
    through.
 
 There is no row count inside the fence. The first version had one, and counting 49 million rows
@@ -62,6 +64,7 @@ SIGNAL_TOPICS = {
     "dublin": "dublin.public.debezium_signal",
     "helsinki": "helsinki.helsinki.debezium_signal",
 }
+LEGACY_APIS = {"dublin": "http://localhost:8001", "helsinki": "http://localhost:8002"}
 UNIFIED = {"dublin": "http://unified:8000/dublin", "helsinki": "http://unified:8000/helsinki"}
 
 
@@ -173,6 +176,16 @@ def await_markers(markers: dict[str, str], timeout_s: float = 10) -> None:
     consumer.close()
     if pending:
         raise TimeoutError(f"markers not seen in Kafka: {pending}")
+
+
+def legacy_writes(open_: bool) -> None:
+    """Open or close the legacy APIs' write gate (legacy_api.common.WriteGate)."""
+    for url in LEGACY_APIS.values():
+        req = urllib.request.Request(
+            f"{url}/admin/writes?open={str(open_).lower()}", data=b"", method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            assert json.load(resp)["writes_open"] is open_
 
 
 def pause_forward() -> None:
@@ -291,6 +304,9 @@ def main() -> None:
         slot_lsn = create_reverse_slot(target)
         tl.step("reverse_ready", slot_lsn=slot_lsn)
 
+        legacy_writes(False)
+        tl.step("legacy_closed")
+
         handed = hand_over(target)
         tl.step("handed_over", **handed)
 
@@ -310,6 +326,7 @@ def main() -> None:
                 "SELECT pg_drop_replication_slot(slot_name) FROM pg_replication_slots "
                 "WHERE slot_name = 'reverse_fleet' AND NOT active"
             )
+            legacy_writes(True)
             if fenced:
                 post(
                     "/admin/route", {"dublin": "http://api-a:8000", "helsinki": "http://api-b:8000"}
