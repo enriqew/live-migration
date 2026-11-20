@@ -19,7 +19,7 @@ import aiomysql
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
-from legacy_api.common import Conflict, replayed, request_hash, require_key
+from legacy_api.common import Conflict, gate, replayed, request_hash, require_key
 
 HELSINKI = ZoneInfo("Europe/Helsinki")
 
@@ -71,6 +71,7 @@ app = FastAPI(title="Helsinki legacy API", lifespan=lifespan)
 
 
 async def idempotent(key: str | None, method: str, path: str, body: dict | None, work):
+    gate.check()
     key = require_key(key)
     h = request_hash(method, path, body)
     async with pool.acquire() as conn:
@@ -201,6 +202,12 @@ async def max_trip_id():
     async with pool.acquire() as conn, conn.cursor() as cur:
         await cur.execute("SELECT COALESCE(MAX(id), 0) FROM matka")
         return {"max_id": (await cur.fetchone())[0]}
+
+
+@app.post("/admin/writes")
+async def set_writes(open: bool):
+    gate.open = open
+    return {"writes_open": gate.open}
 
 
 @app.get("/health")

@@ -190,3 +190,22 @@ def test_helsinki_trip_copies_names_and_replays(helsinki_db, monkeypatch):
         )
         assert cur.fetchone() == (2, "Karhupuisto", 600)
     conn.close()
+
+
+def test_a_closed_write_gate_answers_503_and_reads_still_work(dublin_db, monkeypatch):
+    monkeypatch.setenv("LEGACY_A_DSN", dublin_db)
+    from legacy_api import dublin
+
+    async def scenario():
+        async with dublin.app.router.lifespan_context(dublin.app), await _client(dublin) as c:
+            closed = await c.post("/admin/writes", params={"open": "false"})
+            refused = await c.post(
+                "/rentals", json={"from_station": 2}, headers={"Idempotency-Key": "gate-1"}
+            )
+            read = await c.get("/stations")
+            await c.post("/admin/writes", params={"open": "true"})
+            return closed, refused, read
+
+    closed, refused, read = _run(scenario())
+    assert closed.json() == {"writes_open": False}
+    assert refused.status_code == 503 and read.status_code == 200

@@ -22,7 +22,7 @@ from psycopg.types.json import Jsonb
 from psycopg_pool import AsyncConnectionPool
 from pydantic import BaseModel
 
-from legacy_api.common import Conflict, replayed, request_hash, require_key
+from legacy_api.common import Conflict, gate, replayed, request_hash, require_key
 
 DUBLIN = ZoneInfo("Europe/Dublin")
 DEFAULT_DSN = "host=localhost port=5433 dbname=dublin user=dublin password=dublin"
@@ -69,6 +69,7 @@ app = FastAPI(title="Dublin legacy API", lifespan=lifespan)
 
 
 async def idempotent(key: str | None, method: str, path: str, body: dict | None, work):
+    gate.check()
     key = require_key(key)
     h = request_hash(method, path, body)
     async with pool.connection() as conn, conn.transaction():
@@ -244,6 +245,12 @@ async def stations():
         "stations": [n for n, _ in rows],
         "out_of_service": [n for n, ok in rows if not ok],
     }
+
+
+@app.post("/admin/writes")
+async def set_writes(open: bool):
+    gate.open = open
+    return {"writes_open": gate.open}
 
 
 @app.get("/health")

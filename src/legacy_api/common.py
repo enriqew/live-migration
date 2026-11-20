@@ -47,5 +47,26 @@ def replayed(stored_hash: str, stored_response, this_hash: str):
     return stored_response
 
 
+class WriteGate:
+    """Whether this legacy API still takes writes.
+
+    Closed by the cutover once traffic has moved, opened again by a rollback. It guards the
+    application, not the database: during the rollback window the reverse replication still has
+    to write into the legacy databases, and a read-only database would stop it too. A write that
+    finds the gate closed gets a 503, which a client retries, and the retry goes through the
+    gateway to wherever the system now lives.
+    """
+
+    def __init__(self):
+        self.open = True
+
+    def check(self) -> None:
+        if not self.open:
+            raise HTTPException(503, "this system has moved; writes are closed here")
+
+
+gate = WriteGate()
+
+
 class Conflict(Exception):
     """A business rule refused the write (no bike to rent, no free dock). Answered 409."""
