@@ -208,9 +208,22 @@ def create_reverse_slot(target) -> str:
     return str(lsn)
 
 
-def register_reverse() -> int:
+def reverse_connectors() -> list[str]:
+    return [n for n in connect_api("GET", "/connectors")[1] if n.startswith("fleet")]
+
+
+def register_reverse() -> tuple[str, int]:
+    """Register the reverse connector under a name no connector has had before.
+
+    Kafka Connect keeps a connector's offsets after the connector is deleted, and gives them to the
+    next connector registered under the same name. A reverse connector reusing an old name would
+    start from where an earlier one stopped, on an earlier target, and skip everything until the
+    new target's WAL caught up with that position (it did, on 2026-11-20: the rollback found no
+    marker). A fresh name has no offsets, so it starts at the slot made inside the fence.
+    """
+    name = f"fleet-{datetime.now(UTC):%Y%m%dT%H%M%S}"
     config = json.loads((ROOT / "connect" / "fleet.json").read_text(encoding="utf8"))
-    return connect_api("PUT", "/connectors/fleet/config", config)[0]
+    return name, connect_api("PUT", f"/connectors/{name}/config", config)[0]
 
 
 def hand_over(target) -> dict:
@@ -267,6 +280,8 @@ def main() -> None:
     result = {"ok": False}
     fenced = False
     try:
+        if reverse_connectors():
+            raise RuntimeError(f"reverse connectors still registered: {reverse_connectors()}")
         if target.execute(
             "SELECT 1 FROM pg_replication_slots WHERE slot_name = 'reverse_fleet'"
         ).fetchone():
@@ -313,7 +328,8 @@ def main() -> None:
         post("/admin/route", UNIFIED)
         released = post("/admin/release")
         tl.step("released", **released)
-        tl.step("reverse_registered", status=register_reverse())
+        name, status = register_reverse()
+        tl.step("reverse_registered", connector=name, status=status)
         result = {"ok": True}
     except Exception as e:
         # Never leave clients held: on any failure the fence opens on the legacy upstreams.

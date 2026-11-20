@@ -84,7 +84,9 @@ def snapshot(tables: list[str]) -> None:
 
 
 def reset() -> None:
-    for name in [*CONNECTORS, "fleet"]:  # "fleet": the reverse connector a cutover leaves
+    _, names = _http("GET", "/connectors")
+    reverse = [n for n in names if n.startswith("fleet")]  # what a cutover may leave behind
+    for name in [*CONNECTORS, *reverse]:
         status, _ = _http("GET", f"/connectors/{name}")
         if status == 404:
             continue

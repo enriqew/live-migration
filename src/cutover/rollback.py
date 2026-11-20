@@ -40,6 +40,7 @@ from cutover.run import (
     helsinki,
     legacy_writes,
     post,
+    reverse_connectors,
 )
 from migration.decode import Registry
 
@@ -129,8 +130,15 @@ def hand_back(target) -> dict:
     return {"keys_copied": len(keys), "next_matka_id": next_id}
 
 
-def stop_reverse(target) -> None:
-    connect_api("DELETE", "/connectors/fleet")
+def stop_reverse(target, name: str) -> None:
+    """Stop the reverse connector, delete its offsets, then the connector, then its slot."""
+    connect_api("PUT", f"/connectors/{name}/stop")
+    for _ in range(200):
+        if connect_api("GET", f"/connectors/{name}/status")[1]["connector"]["state"] == "STOPPED":
+            break
+        time.sleep(0.05)
+    connect_api("DELETE", f"/connectors/{name}/offsets")
+    connect_api("DELETE", f"/connectors/{name}")
     for _ in range(200):
         exists = target.execute(
             "SELECT active FROM pg_replication_slots WHERE slot_name = 'reverse_fleet'"
@@ -144,13 +152,16 @@ def stop_reverse(target) -> None:
     raise TimeoutError("reverse slot still active")
 
 
-def preconditions(target) -> None:
+def preconditions(target) -> str:
     """Checked before the fence: a rollback that cannot complete must not hold anyone."""
     with urllib.request.urlopen("http://localhost:8000/admin/state", timeout=10) as resp:
         upstreams = json.load(resp)["upstreams"]
     if not all(url.startswith("http://unified") for url in upstreams.values()):
         raise RuntimeError(f"traffic is not on the unified API: {upstreams}")
-    status, body = connect_api("GET", "/connectors/fleet/status")
+    names = reverse_connectors()
+    if len(names) != 1:
+        raise RuntimeError(f"expected one reverse connector, found {names}")
+    status, body = connect_api("GET", f"/connectors/{names[0]}/status")
     if (
         status != 200
         or body["connector"]["state"] != "RUNNING"
@@ -161,6 +172,13 @@ def preconditions(target) -> None:
         "SELECT 1 FROM pg_replication_slots WHERE slot_name = 'reverse_fleet'"
     ).fetchone():
         raise RuntimeError("no reverse slot")
+    # RUNNING is not enough: a connector reading from the wrong position is RUNNING too. If the
+    # unified API has written anything, the reverse replication must have applied some of it.
+    wrote = target.execute("SELECT count(*) FROM migration.legacy_key").fetchone()[0]
+    applied = target.execute("SELECT count(*) FROM migration.reverse_offset").fetchone()[0]
+    if wrote and not applied:
+        raise RuntimeError(f"the unified API wrote {wrote} rows and the reverse path applied none")
+    return names[0]
 
 
 def main() -> None:
@@ -172,8 +190,8 @@ def main() -> None:
     result = {"ok": False}
     fenced = False
     try:
-        preconditions(target)
-        tl.step("preconditions")
+        reverse_name = preconditions(target)
+        tl.step("preconditions", reverse_connector=reverse_name)
         fence = post("/admin/fence")
         fenced = True
         tl.step("fence", **fence)
@@ -190,7 +208,7 @@ def main() -> None:
             time.sleep(0.05)
         tl.step("drained")
 
-        stop_reverse(target)
+        stop_reverse(target, reverse_name)
         tl.step("reverse_stopped")
 
         handed = hand_back(target)
