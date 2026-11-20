@@ -113,7 +113,10 @@ def _guard_empty_pg(conn: psycopg.Connection, reset: bool) -> None:
         if cur.fetchone()[0]:
             if not reset:
                 raise NotEmpty("legacy A already has rows; pass --reset to empty it first")
-            cur.execute("TRUNCATE rental, station_reading, station RESTART IDENTITY")
+            # The API's idempotency record too: a reloaded system remembers no client keys.
+            cur.execute(
+                "TRUNCATE rental, station_reading, station, api_idempotency RESTART IDENTITY"
+            )
     conn.commit()
 
 
@@ -154,6 +157,7 @@ def load_helsinki(files: list[SourceFile], raw_dir: Path, ep: Endpoints, reset: 
                     raise NotEmpty("legacy B already has rows; pass --reset to empty it first")
                 cur.execute("TRUNCATE TABLE matka")
                 cur.execute("TRUNCATE TABLE asema")
+                cur.execute("TRUNCATE TABLE api_idempotency")
         with tempfile.TemporaryDirectory() as stage:
             for f in sorted(files, key=lambda f: (f.kind != "stations", f.months)):
                 staged = Path(stage) / f"{f.name}.tsv"

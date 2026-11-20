@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import re
 import time
+from datetime import UTC, datetime
 
 import psycopg
 from confluent_kafka import Consumer, Producer, TopicPartition
@@ -18,6 +19,14 @@ from confluent_kafka import Consumer, Producer, TopicPartition
 from chaos.env import ROOT, Env, helsinki, py, sh
 from chaos.planted import PLANT_EVERY
 from cutover.run import KAFKA, LEGACY_A, TARGET
+
+
+def unique(prefix: str) -> str:
+    """A run id no earlier run has used: the generator derives its idempotency keys from it, and
+    keys reused with different requests are, correctly, refused (found on 2026-11-20, when a rerun
+    of scenario 9 met the keys its first run had left in legacy A)."""
+    return f"{prefix}-{datetime.now(UTC):%Y%m%dT%H%M%S}"
+
 
 CLEAN_TABLE = {"missing": 0, "unexpected": 0, "different": 0, "columns": {}}
 
@@ -69,7 +78,7 @@ def s01_writes_race_the_snapshot(env: Env):
     chunks are being read. Watermarks must leave the newer value, and a deleted row must not come
     back from a chunk read before the delete.
     """
-    run_id = "chaos-01"
+    run_id = unique("chaos-01")
     env.reset(during_snapshot=lambda e: e.start_generator(90, 80, 101, run_id))
     env.wait_proc("generator", 900)
     env.wait_drained()
@@ -89,7 +98,7 @@ def s01_writes_race_the_snapshot(env: Env):
 
 def s03_apply_killed(env: Env):
     """Both apply services killed three times mid-snapshot, with writes going on."""
-    run_id = "chaos-03"
+    run_id = unique("chaos-03")
 
     def kill_three_times(e: Env):
         e.start_generator(90, 60, 103, run_id)
@@ -117,7 +126,7 @@ def s03_apply_killed(env: Env):
 
 def s04_connector_rewound(env: Env):
     """The Helsinki connector stopped and restarted from an offset 30 seconds in the past."""
-    run_id = "chaos-04"
+    run_id = unique("chaos-04")
     env.reset()
     _, saved = env.connect("GET", "/connectors/helsinki/offsets")
     env.generate(30, 40, 104, run_id)
@@ -194,7 +203,7 @@ def s05_duplicates_reordered(env: Env):
     batch are collapsed before the version guard sees them, so they are never counted, although
     they change nothing either. The claim was right; the counter was the wrong witness.)
     """
-    run_id = "chaos-05"
+    run_id = unique("chaos-05")
     env.reset()
     env.generate(30, 40, 105, run_id)
     env.wait_drained()
@@ -223,7 +232,7 @@ def s05_duplicates_reordered(env: Env):
 
 def s06_schema_drift(env: Env):
     """A column added to `matka` mid-run: the service stops, then resumes once it is mapped."""
-    run_id = "chaos-06"
+    run_id = unique("chaos-06")
     env.reset()
     b = helsinki()
     try:
@@ -277,7 +286,7 @@ ALERT_BYTES = 1 << 20  # 1 MiB: a dev load, where the real limit is max_slot_wal
 def s07_connector_down(env: Env):
     """The Dublin connector paused while writes go on: the slot retains WAL, the alert fires
     before the limit, and once resumed nothing is lost."""
-    run_id = "chaos-07"
+    run_id = unique("chaos-07")
     env.reset()
     env.connect("PUT", "/connectors/dublin/pause")
     env.wait_until(
@@ -309,7 +318,7 @@ def s07_connector_down(env: Env):
 def s08_target_restart(env: Env):
     """The target restarted under the apply services mid-snapshot: they fail, are restarted by
     the supervisor, and resume from the offsets the target kept."""
-    run_id = "chaos-08"
+    run_id = unique("chaos-08")
 
     def restart_target(e: Env):
         e.start_generator(60, 40, 108, run_id)
@@ -329,7 +338,7 @@ def s08_target_restart(env: Env):
 
 def s09_cutover_and_rollback(env: Env):
     """The whole cycle under load: no write fails, each pause stays under 5 s, nothing is lost."""
-    run_id = "chaos-09"
+    run_id = unique("chaos-09")
     env.reset()
     env.start_generator(180, 50, 109, run_id)
     time.sleep(30)
