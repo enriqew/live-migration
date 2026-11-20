@@ -17,7 +17,7 @@ from confluent_kafka import Consumer, Producer, TopicPartition
 
 from chaos.env import ROOT, Env, helsinki, py, sh
 from chaos.planted import PLANT_EVERY
-from cutover.run import KAFKA, LEGACY_A
+from cutover.run import KAFKA, LEGACY_A, TARGET
 
 CLEAN_TABLE = {"missing": 0, "unexpected": 0, "different": 0, "columns": {}}
 
@@ -172,13 +172,33 @@ def _republish_reversed(topic: str, count: int) -> int:
     return len(msgs)
 
 
+def target_digest() -> str:
+    """One hash over the whole target state the apply service owns: rows and row versions."""
+    with psycopg.connect(TARGET) as t:
+        return t.execute(
+            "SELECT md5(string_agg(h, '' ORDER BY h)) FROM ("
+            "  SELECT md5(s::text) h FROM fleet.station s UNION ALL"
+            "  SELECT md5(s::text) FROM fleet.station_status s UNION ALL"
+            "  SELECT md5(t::text) FROM fleet.trip t UNION ALL"
+            "  SELECT md5(v::text) FROM migration.row_version v) x"
+        ).fetchone()[0]
+
+
 def s05_duplicates_reordered(env: Env):
-    """The last 2,000 events of each data topic delivered again, newest first."""
+    """The last 2,000 events of each data topic delivered again, newest first.
+
+    Every one of them is a change already applied, so the target must not move at all: not a
+    row, not a version. That is measured directly, as a digest of the whole target state taken
+    before the republishing and after the services have read it all. (A first version counted
+    the services' 'stale' changes instead and failed: duplicates of one row that land in one
+    batch are collapsed before the version guard sees them, so they are never counted, although
+    they change nothing either. The claim was right; the counter was the wrong witness.)
+    """
     run_id = "chaos-05"
     env.reset()
     env.generate(30, 40, 105, run_id)
     env.wait_drained()
-    before = stale(env, "apply-dublin") + stale(env, "apply-helsinki")
+    digest_before = target_digest()
     copied = sum(
         _republish_reversed(t, 2000)
         for t in (
@@ -189,12 +209,11 @@ def s05_duplicates_reordered(env: Env):
     )
     time.sleep(10)
     env.wait_drained()
-    declared = {**clean(), "republished": True, "all_stale": True}
-    after = stale(env, "apply-dublin") + stale(env, "apply-helsinki")
+    declared = {**clean(), "republished": True, "target_unchanged": True}
     observed = {
         **verified(env.verify()),
         "republished": copied > 0,
-        "all_stale": after - before >= copied * 0.99,
+        "target_unchanged": target_digest() == digest_before,
     }
     return declared, observed
 
