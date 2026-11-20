@@ -146,6 +146,7 @@ class Env:
         during_snapshot=None,
         config: str = "conf/dev.toml",
         snapshot_timeout: float = 900,
+        snapshot_max_lag: int = 0,
     ) -> None:
         self.stop_all()
         self._gateway_to_legacy()
@@ -166,7 +167,7 @@ class Env:
         py("loader.cdc", "snapshot", "public.station_reading", "public.rental", "helsinki.matka")
         if during_snapshot is not None:
             during_snapshot(self)
-        self.wait_snapshot(snapshot_timeout)
+        self.wait_snapshot(snapshot_timeout, snapshot_max_lag)
         self.timings["snapshot_applied"] = time.time()
 
     def _gateway_to_legacy(self) -> None:
@@ -231,7 +232,7 @@ class Env:
         finally:
             consumer.close()
 
-    def wait_snapshot(self, timeout: float = 900) -> None:
+    def wait_snapshot(self, timeout: float = 900, max_lag: int = 0) -> None:
         """Until every legacy row is in the target (or in quarantine) and nothing is behind."""
 
         def done():
@@ -242,7 +243,7 @@ class Env:
                     "(SELECT count(*) FROM fleet.trip) + "
                     "(SELECT count(*) FROM migration.quarantine)"
                 ).fetchone()[0]
-            return got >= readings + rentals + trips and self.lag() == 0
+            return got >= readings + rentals + trips and self.lag() <= max_lag
 
         self.wait_until(done, timeout, "snapshot applied")
 

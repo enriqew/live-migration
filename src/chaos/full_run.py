@@ -64,7 +64,10 @@ def main() -> None:
 
     try:
         env.reset(
-            config="conf/load.toml", during_snapshot=during_snapshot, snapshot_timeout=4 * 3600
+            config="conf/load.toml",
+            during_snapshot=during_snapshot,
+            snapshot_timeout=4 * 3600,
+            snapshot_max_lag=2000,  # writes continue throughout; the final drain asks for 0
         )
         stop_segments.set()
         writer.join(timeout=700)  # the segment in progress finishes and keeps its log
