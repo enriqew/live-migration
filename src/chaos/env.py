@@ -75,6 +75,7 @@ class Env:
         self.procs: dict[str, subprocess.Popen] = {}
         self.supervised: dict[str, tuple[str, tuple[str, ...], dict]] = {}
         self.restarts: dict[str, int] = {}
+        self.timings: dict[str, float] = {}
 
     # --- processes ------------------------------------------------------------------------------
 
@@ -139,11 +140,19 @@ class Env:
 
     # --- state ----------------------------------------------------------------------------------
 
-    def reset(self, apply_module: str = "migration.apply", during_snapshot=None) -> None:
+    def reset(
+        self,
+        apply_module: str = "migration.apply",
+        during_snapshot=None,
+        config: str = "conf/dev.toml",
+        snapshot_timeout: float = 900,
+    ) -> None:
         self.stop_all()
         self._gateway_to_legacy()
         py("loader.cdc", "reset")
-        py("loader", "load", "--config", "conf/dev.toml", "--reset")
+        self.timings["load_started"] = time.time()
+        py("loader", "load", "--config", config, "--reset", timeout=7200)
+        self.timings["load_finished"] = time.time()
         sh("docker", "compose", "rm", "-sf", "target", "unified")
         sh("docker", "volume", "rm", "live-migration_target", check=False)
         sh("docker", "compose", "up", "-d", "--wait", "target", "unified")
@@ -151,11 +160,14 @@ class Env:
         self.wait_connectors()
         self.start_apply(apply_module)
         py("loader.cdc", "snapshot", "public.station", "helsinki.asema")
-        self.wait_until(lambda: self.count_target("fleet.station") >= 114 + 457, 120, "stations")
+        stations = self.legacy_station_count()
+        self.wait_until(lambda: self.count_target("fleet.station") >= stations, 300, "stations")
+        self.timings["snapshot_started"] = time.time()
         py("loader.cdc", "snapshot", "public.station_reading", "public.rental", "helsinki.matka")
         if during_snapshot is not None:
             during_snapshot(self)
-        self.wait_snapshot()
+        self.wait_snapshot(snapshot_timeout)
+        self.timings["snapshot_applied"] = time.time()
 
     def _gateway_to_legacy(self) -> None:
         gw = "http://localhost:8000"
@@ -200,6 +212,16 @@ class Env:
             trips = cur.fetchone()[0]
         b.close()
         return readings, rentals, trips
+
+    def legacy_station_count(self) -> int:
+        with psycopg.connect(LEGACY_A) as a:
+            dublin = a.execute("SELECT count(*) FROM station").fetchone()[0]
+        b = helsinki()
+        with b.cursor() as cur:
+            cur.execute("SELECT count(*) FROM asema")
+            asema = cur.fetchone()[0]
+        b.close()
+        return dublin + asema
 
     def lag(self) -> int:
         consumer = Consumer({"bootstrap.servers": KAFKA, "group.id": "chaos-lag"})
