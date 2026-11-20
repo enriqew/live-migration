@@ -84,7 +84,7 @@ def snapshot(tables: list[str]) -> None:
 
 
 def reset() -> None:
-    for name in CONNECTORS:
+    for name in [*CONNECTORS, "fleet"]:  # "fleet": the reverse connector a cutover leaves
         status, _ = _http("GET", f"/connectors/{name}")
         if status == 404:
             continue
@@ -125,7 +125,11 @@ def reset() -> None:
     conn.close()
 
     topics = _kafka("--list").split()
-    doomed = [t for t in topics if t.split(".")[0] in CONNECTORS or t == "schema-history.helsinki"]
+    doomed = [
+        t
+        for t in topics
+        if t.split(".")[0] in {*CONNECTORS, "fleet"} or t == "schema-history.helsinki"
+    ]
     for t in doomed:
         _kafka("--delete", "--topic", t)
     print(f"kafka: {len(doomed)} topics deleted")

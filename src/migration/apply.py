@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import heapq
 import json
+import os
 import signal
 import time
 from collections import defaultdict
@@ -201,8 +202,38 @@ def position(system: str, source: dict) -> tuple[int, int]:
     return (number << 32) | int(source["pos"]), int(source["row"])
 
 
+def ignored_columns() -> dict[str, set[str]]:
+    """Columns deployed as known and irrelevant: APPLY_IGNORE_COLUMNS=topic:col,topic:col.
+
+    This is how a schema change is let through after the service stopped on it: someone reads
+    the change, decides the spec does not need the column, and says so. Nothing is ignored by
+    default, so an unexpected column always stops the service first.
+    """
+    out: dict[str, set[str]] = defaultdict(set)
+    for item in filter(None, os.environ.get("APPLY_IGNORE_COLUMNS", "").split(",")):
+        topic, column = item.rsplit(":", 1)
+        out[topic].add(column)
+    return out
+
+
+IGNORED = ignored_columns()
+
+
 def to_change(topic: str, ev, folds: dict) -> Change:
     t = TABLES[topic]
+    if topic in IGNORED:
+        drop = IGNORED[topic]
+        ev = ev.__class__(
+            **{
+                **ev.__dict__,
+                "before": {k: v for k, v in ev.before.items() if k not in drop}
+                if ev.before is not None
+                else None,
+                "after": {k: v for k, v in ev.after.items() if k not in drop}
+                if ev.after is not None
+                else None,
+            }
+        )
     image = ev.before if ev.op == "d" else ev.after
     for img in (ev.before, ev.after):
         if img is not None and set(img) != t.columns:
