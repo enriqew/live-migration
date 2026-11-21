@@ -10,10 +10,14 @@ data/runs/full-<ts>/run.json:
    cutover after 1 minute, the rollback after 10, the reverse replication running in between;
 4. drain and verify: the generator stops, the forward path catches up, and the verifier
    compares every row of the legacy systems with the target.
+
+`--cycle-only` skips 1 and 2: it runs the cycle and the verification on the state a full run left,
+loaded, snapshotted and drained, once the apply services have caught up with whatever is left.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import threading
 import time
@@ -29,10 +33,17 @@ ROLLBACK_AT = 600
 
 
 def main() -> None:
+    p = argparse.ArgumentParser(prog="chaos.full_run")
+    p.add_argument("--cycle-only", action="store_true", help="skip the load and the snapshot")
+    cycle_only = p.parse_args().cycle_only
     stamp = f"{datetime.now(UTC):%Y%m%dT%H%M%SZ}"
-    run_dir = ROOT / "data" / "runs" / f"full-{stamp}"
+    run_dir = ROOT / "data" / "runs" / f"{'cycle' if cycle_only else 'full'}-{stamp}"
     env = Env(run_dir)
-    report: dict = {"started_at": datetime.now(UTC).isoformat(), "segments": []}
+    report: dict = {
+        "started_at": datetime.now(UTC).isoformat(),
+        "cycle_only": cycle_only,
+        "segments": [],
+    }
     stop_segments = threading.Event()
 
     def segments() -> None:
@@ -63,15 +74,19 @@ def main() -> None:
         writer.start()
 
     try:
-        env.reset(
-            config="conf/load.toml",
-            during_snapshot=during_snapshot,
-            snapshot_timeout=4 * 3600,
-            snapshot_max_lag=2000,  # writes continue throughout; the final drain asks for 0
-        )
-        stop_segments.set()
-        writer.join(timeout=700)  # the segment in progress finishes and keeps its log
-        env.wait_drained(600)
+        if cycle_only:
+            env.start_apply()
+            env.wait_drained(600)
+        else:
+            env.reset(
+                config="conf/load.toml",
+                during_snapshot=during_snapshot,
+                snapshot_timeout=4 * 3600,
+                snapshot_max_lag=2000,  # writes continue throughout; the final drain asks for 0
+            )
+            stop_segments.set()
+            writer.join(timeout=700)  # the segment in progress finishes and keeps its log
+            env.wait_drained(600)
         report["snapshot_drained_at"] = time.time()
 
         cycle_id = f"full-{stamp}-cycle"
