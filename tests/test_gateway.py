@@ -59,3 +59,24 @@ def test_route_is_refused_unless_fenced():
             return await c.post("/admin/route", json={"dublin": "http://new"})
 
     assert run(go()).status_code == 409
+
+
+def test_an_unreachable_upstream_is_a_status_the_client_may_retry():
+    async def go(exc):
+        def upstream(request: httpx.Request):
+            raise exc
+
+        gw.state.__init__()
+        gw.UPSTREAMS.update(dublin="http://old")
+        gw.client = httpx.AsyncClient(transport=httpx.MockTransport(upstream))
+        transport = httpx.ASGITransport(app=gw.app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://gw") as c:
+            resp = await c.post("/dublin/rentals", json={})
+            return resp, gw.state.in_flight
+
+    # A connection the upstream closed as the request was sent: 502, not a 500.
+    resp, in_flight = run(go(httpx.ReadError("closed")))
+    assert resp.status_code == 502 and "ReadError" in resp.json()["detail"]
+    assert in_flight == 0
+    resp, _ = run(go(httpx.ReadTimeout("slow")))
+    assert resp.status_code == 504

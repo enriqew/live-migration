@@ -12,6 +12,10 @@ API after it. The cutover is three admin calls:
 
 A held request is not an error to the client, only a slower answer. That wait is the pause the
 project measures, and the generator measures it from when each request was due.
+
+An upstream that cannot be reached, or does not answer in time, is a 502 or a 504: statuses a
+client may retry, and with its idempotency key a retry cannot apply a write twice. The gateway does
+not retry on its own; the client owns the key and the deadline.
 """
 
 from __future__ import annotations
@@ -51,7 +55,14 @@ client: httpx.AsyncClient
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global client
-    client = httpx.AsyncClient(timeout=30.0, limits=httpx.Limits(max_connections=400))
+    # uvicorn closes an idle connection after 5 s. A pooled connection kept as long as that may be
+    # picked for a request just as the server closes it, and the request dies with a ReadError
+    # (4 writes did, in the full run of 2026-11-20). Expiring idle connections at 2 s leaves the
+    # pool only connections the server still holds open.
+    client = httpx.AsyncClient(
+        timeout=30.0,
+        limits=httpx.Limits(max_connections=400, keepalive_expiry=2.0),
+    )
     yield
     await client.aclose()
 
@@ -103,6 +114,11 @@ async def admin_state():
     }
 
 
+def _upstream_error(status: int, e: Exception) -> Response:
+    detail = f"{type(e).__name__}: {e}"[:200].replace('"', "'")
+    return Response(f'{{"detail": "{detail}"}}', status_code=status, media_type="application/json")
+
+
 @app.api_route("/{system}/{path:path}", methods=["GET", "POST", "PATCH", "DELETE"])
 async def forward(system: str, path: str, request: Request):
     if system not in UPSTREAMS:
@@ -121,13 +137,18 @@ async def forward(system: str, path: str, request: Request):
     try:
         upstream = UPSTREAMS[system]
         headers = {k: v for k, v in request.headers.items() if k.lower() not in HOP_BY_HOP}
-        resp = await client.request(
-            request.method,
-            f"{upstream}/{path}",
-            content=await request.body(),
-            headers=headers,
-            params=request.query_params,
-        )
+        try:
+            resp = await client.request(
+                request.method,
+                f"{upstream}/{path}",
+                content=await request.body(),
+                headers=headers,
+                params=request.query_params,
+            )
+        except httpx.TimeoutException as e:
+            return _upstream_error(504, e)
+        except httpx.TransportError as e:
+            return _upstream_error(502, e)
         out_headers = {k: v for k, v in resp.headers.items() if k.lower() not in HOP_BY_HOP}
         return Response(resp.content, status_code=resp.status_code, headers=out_headers)
     finally:
