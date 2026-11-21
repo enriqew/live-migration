@@ -9,8 +9,9 @@ like the cutover, and written to data/runs/rollback-<ts>/rollback.json.
 3. drain: the reverse replication commits past the end offsets of its topics as they stand then;
 4. stop the reverse path: its connector is deleted and its slot dropped, so nothing it would carry
    can come back round once the forward path runs again;
-5. hand back: the unified API's recent idempotency keys go to each legacy API, and each legacy
-   sequence moves past the keys the unified API created;
+5. hand back: the idempotency keys the unified API created go to the legacy API of their system
+   (not the ones the cutover handed over, which the legacy systems already hold), and each legacy
+   sequence moves past the keys the unified API created; both systems at once;
 6. resume the forward connectors: they carry the reverse replication's own writes to the target,
    where they change nothing, since the target already holds those values;
 7. open the legacy APIs to writes again, then route and release: the gateway sends each
@@ -23,6 +24,7 @@ import json
 import time
 import urllib.request
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 
 import psycopg
@@ -97,11 +99,7 @@ def reverse_behind(consumer: Consumer, target) -> dict:
     }
 
 
-def hand_back(target) -> dict:
-    keys = target.execute(
-        "SELECT key, request_hash, response::text, created_at FROM migration.api_idempotency "
-        "WHERE created_at > now() - interval '1 hour'"
-    ).fetchall()
+def _back_to_dublin(keys: list) -> None:
     with psycopg.connect(LEGACY_A) as a:
         a.cursor().executemany(
             "INSERT INTO api_idempotency (key, request_hash, response, created_at) "
@@ -116,18 +114,52 @@ def hand_back(target) -> dict:
             "SELECT setval(pg_get_serial_sequence('station_reading', 'reading_id'), "
             "(SELECT coalesce(max(reading_id), 1) FROM station_reading))"
         )
+
+
+def _back_to_helsinki(keys: list) -> int:
     b = helsinki()
-    with b.cursor() as cur:
-        cur.executemany(
-            "INSERT IGNORE INTO api_idempotency (`key`, request_hash, response, created_at) "
-            "VALUES (%s, %s, %s, %s)",
-            keys,
-        )
-        cur.execute("SELECT coalesce(max(id), 0) + 1 FROM matka")
-        next_id = int(cur.fetchone()[0])
-        cur.execute(f"ALTER TABLE matka AUTO_INCREMENT = {next_id}")
-    b.close()
-    return {"keys_copied": len(keys), "next_matka_id": next_id}
+    try:
+        with b.cursor() as cur:
+            cur.executemany(
+                "INSERT IGNORE INTO api_idempotency (`key`, request_hash, response, created_at) "
+                "VALUES (%s, %s, %s, %s)",
+                keys,
+            )
+            cur.execute("SELECT coalesce(max(id), 0) + 1 FROM matka")
+            next_id = int(cur.fetchone()[0])
+            cur.execute(f"ALTER TABLE matka AUTO_INCREMENT = {next_id}")
+        return next_id
+    finally:
+        b.close()
+
+
+def hand_back(target) -> dict:
+    """The keys the unified API created, each to its own legacy system, both systems at once.
+
+    It runs inside the fence. In the full run of 2026-11-20 it copied every key of the last hour
+    to both systems one after the other (86,447 keys, 4 of the rollback's 6 seconds), most of them
+    keys the cutover had brought from those same systems.
+    """
+    rows = target.execute(
+        "SELECT system, key, request_hash, response::text, created_at "
+        "FROM migration.api_idempotency "
+        "WHERE origin = 'target' AND created_at > now() - interval '1 hour'"
+    ).fetchall()
+    by_system: dict[str | None, list] = {"dublin": [], "helsinki": []}
+    for system, *key in rows:
+        by_system.setdefault(system, []).append(tuple(key))
+    unknown = by_system.pop(None, [])  # a key with no system recorded goes to both
+    with ThreadPoolExecutor(2) as pool:
+        a = pool.submit(_back_to_dublin, by_system["dublin"] + unknown)
+        b = pool.submit(_back_to_helsinki, by_system["helsinki"] + unknown)
+        a.result()
+        next_id = b.result()
+    return {
+        "keys_copied": len(rows),
+        "keys_dublin": len(by_system["dublin"]),
+        "keys_helsinki": len(by_system["helsinki"]),
+        "next_matka_id": next_id,
+    }
 
 
 def stop_reverse(target, name: str) -> None:

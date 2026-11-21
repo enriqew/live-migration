@@ -56,15 +56,15 @@ def helsinki_wall() -> datetime:
     return datetime.now(HELSINKI).replace(tzinfo=None, microsecond=0)
 
 
-async def idempotent(key, method, path, body, work):
+async def idempotent(system, key, method, path, body, work):
     key = require_key(key)
     h = request_hash(method, path, body)
     async with pool.connection() as conn, conn.transaction():
         cur = conn.cursor(row_factory=dict_row)
         await cur.execute(
-            "INSERT INTO migration.api_idempotency (key, request_hash) VALUES (%s, %s) "
-            "ON CONFLICT (key) DO NOTHING RETURNING key",
-            (key, h),
+            "INSERT INTO migration.api_idempotency (key, request_hash, system) "
+            "VALUES (%s, %s, %s) ON CONFLICT (key) DO NOTHING RETURNING key",
+            (key, h, system),
         )
         if await cur.fetchone() is None:
             await cur.execute(
@@ -204,7 +204,7 @@ async def start_rental(body: RentalStart, idempotency_key: str | None = Header(N
         )
         return {"rental_id": rental_id}
 
-    return await idempotent(idempotency_key, "POST", "/rentals", body.model_dump(), work)
+    return await idempotent("dublin", idempotency_key, "POST", "/rentals", body.model_dump(), work)
 
 
 @dublin.post("/rentals/{rental_id}/return")
@@ -267,7 +267,7 @@ async def return_rental(
         return {"rental_id": rental_id}
 
     path = f"/rentals/{rental_id}/return"
-    return await idempotent(idempotency_key, "POST", path, body.model_dump(), work)
+    return await idempotent("dublin", idempotency_key, "POST", path, body.model_dump(), work)
 
 
 @dublin.delete("/rentals/{rental_id}")
@@ -282,7 +282,9 @@ async def erase_rental(rental_id: int, idempotency_key: str | None = Header(None
             raise HTTPException(404, f"no rental {rental_id}")
         return {"rental_id": rental_id, "deleted": True}
 
-    return await idempotent(idempotency_key, "DELETE", f"/rentals/{rental_id}", None, work)
+    return await idempotent(
+        "dublin", idempotency_key, "DELETE", f"/rentals/{rental_id}", None, work
+    )
 
 
 @dublin.patch("/stations/{number}")
@@ -302,7 +304,9 @@ async def change_station(
         return {"number": number, "name": row["name"], "bike_stands": row["capacity"]}
 
     body_dict = body.model_dump(exclude_none=True)
-    return await idempotent(idempotency_key, "PATCH", f"/stations/{number}", body_dict, work)
+    return await idempotent(
+        "dublin", idempotency_key, "PATCH", f"/stations/{number}", body_dict, work
+    )
 
 
 @dublin.post("/stations/{number}/service")
@@ -326,7 +330,9 @@ async def station_service(
         return {"reading_id": reading_id}
 
     body_dict = body.model_dump(exclude_none=True)
-    return await idempotent(idempotency_key, "POST", f"/stations/{number}/service", body_dict, work)
+    return await idempotent(
+        "dublin", idempotency_key, "POST", f"/stations/{number}/service", body_dict, work
+    )
 
 
 # --- Helsinki -----------------------------------------------------------------------------------
@@ -384,7 +390,7 @@ async def trip_done(body: TripDone, idempotency_key: str | None = Header(None)):
         await _insert(cur, "trip", trip)
         return {"id": trip_id}
 
-    return await idempotent(idempotency_key, "POST", "/matkat", body.model_dump(), work)
+    return await idempotent("helsinki", idempotency_key, "POST", "/matkat", body.model_dump(), work)
 
 
 @helsinki.patch("/matkat/{trip_id}")
@@ -421,7 +427,9 @@ async def correct_trip(
         return {"id": trip_id, **changes}
 
     body_dict = body.model_dump(exclude_none=True)
-    return await idempotent(idempotency_key, "PATCH", f"/matkat/{trip_id}", body_dict, work)
+    return await idempotent(
+        "helsinki", idempotency_key, "PATCH", f"/matkat/{trip_id}", body_dict, work
+    )
 
 
 @helsinki.delete("/matkat/{trip_id}")
@@ -436,7 +444,7 @@ async def erase_trip(trip_id: int, idempotency_key: str | None = Header(None)):
             raise HTTPException(404, f"no trip {trip_id}")
         return {"id": trip_id, "deleted": True}
 
-    return await idempotent(idempotency_key, "DELETE", f"/matkat/{trip_id}", None, work)
+    return await idempotent("helsinki", idempotency_key, "DELETE", f"/matkat/{trip_id}", None, work)
 
 
 @helsinki.patch("/asemat/{station_id}")
@@ -461,7 +469,9 @@ async def change_asema(
         return {"id": station_id, **changes}
 
     body_dict = body.model_dump(exclude_none=True)
-    return await idempotent(idempotency_key, "PATCH", f"/asemat/{station_id}", body_dict, work)
+    return await idempotent(
+        "helsinki", idempotency_key, "PATCH", f"/asemat/{station_id}", body_dict, work
+    )
 
 
 @app.get("/{system}/health")

@@ -107,7 +107,9 @@ CREATE TABLE migration.api_idempotency (
     key           text PRIMARY KEY,
     request_hash  text NOT NULL,
     response      jsonb,
-    created_at    timestamptz NOT NULL DEFAULT now()
+    created_at    timestamptz NOT NULL DEFAULT now(),
+    system        text,                           -- dublin or helsinki: whose API the key belongs to
+    origin        text NOT NULL DEFAULT 'target'  -- 'legacy': handed over by a cutover
 );
 
 -- Legacy-compatible keys for rows the unified API creates, so that every target id is still

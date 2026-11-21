@@ -35,6 +35,7 @@ import json
 import time
 import urllib.request
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -226,10 +227,9 @@ def register_reverse() -> tuple[str, int]:
     return name, connect_api("PUT", f"/connectors/{name}/config", config)[0]
 
 
-def hand_over(target) -> dict:
-    """Recent idempotency keys and the key sequences, legacy to target."""
+def _read_dublin() -> tuple[list, int, int]:
     with psycopg.connect(LEGACY_A) as a:
-        keys_a = a.execute(
+        keys = a.execute(
             "SELECT key, request_hash, response::text, created_at FROM "
             "api_idempotency WHERE created_at > now() - interval '1 hour'"
         ).fetchall()
@@ -237,21 +237,50 @@ def hand_over(target) -> dict:
         max_reading = a.execute(
             "SELECT coalesce(max(reading_id), 0) FROM station_reading"
         ).fetchone()[0]
+    return keys, max_rental, max_reading
+
+
+def _read_helsinki() -> tuple[list, int]:
     b = helsinki()
-    with b.cursor() as cur:
-        cur.execute(
-            "SELECT `key`, request_hash, CAST(response AS CHAR), created_at FROM "
-            "api_idempotency WHERE created_at > now() - interval 1 hour"
-        )
-        keys_b = cur.fetchall()
-        cur.execute("SELECT coalesce(max(id), 0) FROM matka")
-        max_matka = cur.fetchone()[0]
-    b.close()
+    try:
+        with b.cursor() as cur:
+            cur.execute(
+                "SELECT `key`, request_hash, CAST(response AS CHAR), created_at FROM "
+                "api_idempotency WHERE created_at > now() - interval 1 hour"
+            )
+            keys = cur.fetchall()
+            cur.execute("SELECT coalesce(max(id), 0) FROM matka")
+            return keys, cur.fetchone()[0]
+    finally:
+        b.close()
+
+
+def hand_over(target) -> dict:
+    """Recent idempotency keys and the key sequences, legacy to target.
+
+    This runs inside the fence, so every second here is a second every client waits: both legacy
+    systems are read at once, and the keys go into the target by COPY. Each key is stored with its
+    system and marked as handed over, so that a rollback sends back only the keys the unified API
+    created, each to its own system.
+    """
+    with ThreadPoolExecutor(2) as pool:
+        a, b = pool.submit(_read_dublin), pool.submit(_read_helsinki)
+        keys_a, max_rental, max_reading = a.result()
+        keys_b, max_matka = b.result()
     with target.transaction():
-        target.cursor().executemany(
-            "INSERT INTO migration.api_idempotency (key, request_hash, response, created_at) "
-            "VALUES (%s, %s, %s::jsonb, %s) ON CONFLICT (key) DO NOTHING",
-            [*keys_a, *keys_b],
+        target.execute(
+            "CREATE TEMP TABLE handed_keys (key text, request_hash text, response jsonb, "
+            "created_at timestamptz, system text) ON COMMIT DROP"
+        )
+        with target.cursor().copy("COPY handed_keys FROM STDIN") as copy:
+            for system, keys in (("dublin", keys_a), ("helsinki", keys_b)):
+                for key in keys:
+                    copy.write_row((*key, system))
+        target.execute(
+            "INSERT INTO migration.api_idempotency "
+            "(key, request_hash, response, created_at, system, origin) "
+            "SELECT key, request_hash, response, created_at, system, 'legacy' FROM handed_keys "
+            "ON CONFLICT (key) DO NOTHING"
         )
         for seq, value in (
             ("seq_dublin_rental", max_rental),
