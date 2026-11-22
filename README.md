@@ -62,6 +62,16 @@ again in SQL (UUIDv5 built from SHA-1, wall-clock hours classified by asking the
 compares in three levels: counts per bucket, a hash per bucket, then the rows and columns of any
 bucket that differs. A test fails the build if the verifier imports the migration.
 
+**Continuous verification** checks the same spec chunk by chunk while both systems keep taking
+writes. A source and a target are only comparable at the same source position, so the verifier
+reads a chunk with `FOR SHARE` and inserts a checksum marker in the same source transaction. The
+marker travels through CDC; the apply service applies it only once every transaction that committed
+before it is in the target, holds back the ones that came after, and copies the target's rows for
+that chunk aside in the marker's own transaction. The verifier compares that copy with what its spec
+derives from the rows it read. A chunk that differs is checked again with a new marker, and is a
+finding only if it differs twice. This is the `pt-table-checksum` idea carried over to a CDC
+pipeline.
+
 ## Chaos suite
 
 Each scenario starts from a fresh environment and declares beforehand what it expects to see.
@@ -97,6 +107,7 @@ uv run python -m cutover.run
 uv run python -m migration.reverse
 uv run python -m cutover.rollback
 uv run python -m verifier.run
+uv run python -m verifier.continuous                    # while the generator writes
 
 uv run python -m chaos.run                              # the suite, or name scenarios
 uv run python -m chaos.full_run                         # the full-size run, end to end
