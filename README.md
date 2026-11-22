@@ -85,6 +85,7 @@ From the full-size runs on one workstation, every service in Docker Compose:
 | Operations failed in the cycle | 0 of 45,000, none retried, p99 latency 103 ms |
 | Frozen verification after the cycle | 49,404,189 rows, all equal |
 | Continuous verification under 50 writes a second | 49,400,822 rows in 5,150 chunks in 39 minutes, all equal; locks held 124 ms at the median |
+| Writes during that pass | 0 of 150,000 failed; p99 latency 876 ms, against 103 ms without it |
 
 ## Chaos suite
 
