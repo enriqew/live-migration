@@ -144,3 +144,24 @@ CREATE TABLE migration.rollback_marker (
 -- The tables the reverse connector reads. The slot is created at the cutover, inside the fence.
 CREATE PUBLICATION reverse_fleet FOR TABLE fleet.station, fleet.station_status, fleet.trip,
     migration.rollback_marker;
+
+-- The continuous verification's side of a checksum marker. When the apply service reaches a
+-- marker it records it here and copies the target's rows for that chunk aside, in the transaction
+-- that applies the marker: the state the source had when the marker committed. The verifier reads
+-- the copies, compares them, and deletes them.
+CREATE TABLE migration.verify_marker_applied (
+    marker_id     uuid PRIMARY KEY,
+    source        text   NOT NULL,
+    legacy_table  text   NOT NULL,
+    lo            bigint NOT NULL,
+    hi            bigint NOT NULL,
+    applied_at    timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE migration.snap_station (marker_id uuid NOT NULL, LIKE fleet.station);
+CREATE TABLE migration.snap_station_status (marker_id uuid NOT NULL, LIKE fleet.station_status);
+CREATE TABLE migration.snap_trip (marker_id uuid NOT NULL, LIKE fleet.trip);
+CREATE TABLE migration.snap_quarantine (marker_id uuid NOT NULL, LIKE migration.quarantine);
+CREATE INDEX ON migration.snap_station (marker_id);
+CREATE INDEX ON migration.snap_station_status (marker_id);
+CREATE INDEX ON migration.snap_trip (marker_id);
+CREATE INDEX ON migration.snap_quarantine (marker_id);

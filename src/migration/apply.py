@@ -16,6 +16,12 @@ At-least-once in, exactly-once in effect:
   read for every partition: the lowest offset not yet applied. A crash loses nothing and repeats
   only what the version guard turns into no-ops.
 - **Fail closed on schema drift.** A column the spec has no rule for stops the service.
+- **Checksum markers.** A row in a legacy system's `verify_marker` table, written by the
+  continuous verifier in the transaction that reads a chunk. The service applies it only once
+  every source transaction that committed before it is in the target, and holds back every one
+  that committed after it; then, in the marker's own target transaction, it sets the target's rows
+  for that chunk aside. What it sets aside is the target exactly at the marker's source position.
+  The service computes nothing about those rows: comparing them is the verifier's job.
 """
 
 from __future__ import annotations
@@ -178,6 +184,70 @@ class SchemaDrift(RuntimeError):
     pass
 
 
+MARKER_TOPICS = {
+    "dublin": "dublin.public.verify_marker",
+    "helsinki": "helsinki.helsinki.verify_marker",
+}
+
+# A marker names a legacy table and a key range. The target rows of that range are found by their
+# ids, which PostgreSQL derives here with its own uuid_generate_v5: the copy does not depend on the
+# migration's id function, so a wrong id in the target shows as a missing row.
+MARKED = {
+    "station_reading": ("dublin", "station_status", "dublin:station_reading:"),
+    "rental": ("dublin", "trip", "dublin:rental:"),
+    "matka": ("helsinki", "trip", "helsinki:matka:"),
+    "station": ("dublin", "station", None),
+    "asema": ("helsinki", "station", None),
+}
+
+
+@dataclass(frozen=True)
+class Marker:
+    marker_id: str
+    legacy_table: str
+    lo: int
+    hi: int
+
+
+def set_aside(cur, system: str, m: Marker) -> bool:
+    """Record the marker and copy the target's rows for its chunk aside. False if seen before."""
+    cur.execute(
+        "INSERT INTO migration.verify_marker_applied (marker_id, source, legacy_table, lo, hi) "
+        "VALUES (%s, %s, %s, %s, %s) ON CONFLICT DO NOTHING RETURNING marker_id",
+        (m.marker_id, system, m.legacy_table, m.lo, m.hi),
+    )
+    if cur.fetchone() is None or m.legacy_table not in MARKED:
+        return False
+    source, table, prefix = MARKED[m.legacy_table]
+    if prefix is None:
+        # The whole station register. Helsinki's stubs depend on every trip, not on the register,
+        # and are left to the frozen check.
+        cur.execute(
+            "INSERT INTO migration.snap_station SELECT %s, s.* FROM fleet.station s "
+            "WHERE s.system_code = %s AND s.kind <> 'unlisted'",
+            (m.marker_id, source),
+        )
+        cur.execute(
+            "INSERT INTO migration.snap_quarantine SELECT %s, q.* FROM migration.quarantine q "
+            "WHERE q.source = %s AND q.legacy_table = %s",
+            (m.marker_id, source, m.legacy_table),
+        )
+        return True
+    cur.execute(
+        f"INSERT INTO migration.snap_{table} SELECT %s, x.* FROM fleet.{table} x "
+        f"WHERE x.{PK[table]} IN (SELECT uuid_generate_v5(%s::uuid, %s || k) "
+        "FROM generate_series(%s::bigint, %s::bigint) AS k)",
+        (m.marker_id, str(tf.NAMESPACE), prefix, m.lo, m.hi),
+    )
+    cur.execute(
+        "INSERT INTO migration.snap_quarantine SELECT %s, q.* FROM migration.quarantine q "
+        "WHERE q.source = %s AND q.legacy_table = %s AND q.legacy_key IN "
+        "(SELECT k::text FROM generate_series(%s::bigint, %s::bigint) AS k)",
+        (m.marker_id, source, m.legacy_table, m.lo, m.hi),
+    )
+    return True
+
+
 @dataclass
 class Change:
     target_table: str
@@ -335,8 +405,13 @@ def apply_batch(
     changes: list[Change],
     offsets: dict,
     applied_txns: tuple[str, list[str]] = ("", []),
+    marker: Marker | None = None,
 ) -> dict[str, int]:
-    """Apply one batch and the offsets it reaches, in one target transaction."""
+    """Apply one batch and the offsets it reaches, in one target transaction.
+
+    With a marker, the batch is that marker's transaction and nothing else (the service makes sure
+    of it), and the chunk is set aside after the rows: at the marker's position.
+    """
     stats: dict[str, int] = defaultdict(int)
     latest = newest(changes)
     with conn.transaction(), conn.cursor() as cur:
@@ -432,6 +507,8 @@ def apply_batch(
             ["target_table", "row_id"],
         )
         source, txn_ids = applied_txns
+        if marker is not None and set_aside(cur, source, marker):
+            stats["markers"] += 1
         if txn_ids:
             cur.executemany(
                 "INSERT INTO migration.applied_txn (source, txn_id) VALUES (%s, %s) "
@@ -509,6 +586,8 @@ class Txn:
     seen: dict[str, int] = field(default_factory=lambda: defaultdict(int))
     expected: dict[str, int] | None = None  # from END, only the collections this service reads
     end_at: tuple[tuple[str, int], int] | None = None
+    marker: Marker | None = None
+    meta: list[tuple[tuple[str, int], int]] = field(default_factory=list)  # events with no row
 
     def complete(self) -> bool:
         return self.expected is not None and all(
@@ -535,7 +614,9 @@ class Service:
     def __init__(self, system: str, batch: int):
         self.system = system
         self.batch = batch
-        self.data_topics = [t for t in TABLES if t.startswith(f"{system}.")]
+        self.marker_topic = MARKER_TOPICS[system]
+        self.marker_collection = collection_of(self.marker_topic)
+        self.data_topics = [*(t for t in TABLES if t.startswith(f"{system}.")), self.marker_topic]
         self.txn_topic = f"{system}.transaction"
         self.collections = {collection_of(t) for t in self.data_topics}
         self.registry = Registry(REGISTRY)
@@ -548,6 +629,10 @@ class Service:
         self.completed_since_flush: list[str] = []
         self.stop = False
         self.folds: dict = {}
+        # Markers whose transaction is complete, waiting for every earlier transaction, in the
+        # order of their END records; and the transactions that ended after the first of them.
+        self.markers: list[tuple[int, str, Txn]] = []
+        self.held: list[tuple[str, Txn]] = []
 
     def start(self) -> Consumer:
         if self.system == "dublin":
@@ -647,6 +732,9 @@ class Service:
             self._maybe_ready(txn_id)
             return
         ev = event(msg.topic(), msg.partition(), offset, record, semantic)
+        if msg.topic() == self.marker_topic:
+            self._marker_event(tp, offset, ev)
+            return
         change = to_change(msg.topic(), ev, self.folds)
         if ev.transaction is None or txn_key(self.system, ev.transaction["id"]) in self.applied:
             # A snapshot read, or an event of a transaction applied before a restart: nothing to
@@ -659,14 +747,87 @@ class Service:
         txn.seen[collection_of(msg.topic())] += 1
         self._maybe_ready(txn_id)
 
+    def _marker_event(self, tp, offset, ev) -> None:
+        """A marker row: inserted by the verifier, or deleted when it cleans up (nothing to do)."""
+        if ev.transaction is None or txn_key(self.system, ev.transaction["id"]) in self.applied:
+            self.finished_meta.append((tp, offset))
+            return
+        txn_id = txn_key(self.system, ev.transaction["id"])
+        txn = self.txns.setdefault(txn_id, Txn())
+        txn.meta.append((tp, offset))
+        txn.seen[self.marker_collection] += 1
+        if ev.op == "c":
+            a = ev.after
+            txn.marker = Marker(str(a["id"]), a["legacy_table"], int(a["lo"]), int(a["hi"]))
+        self._maybe_ready(txn_id)
+
     def _maybe_ready(self, txn_id: str) -> None:
         txn = self.txns[txn_id]
-        if txn.complete():
-            self.ready.extend(txn.changes)
-            self.finished_meta.append(txn.end_at)
-            self.completed_since_flush.append(txn_id)
+        if not txn.complete():
+            return
+        del self.txns[txn_id]
+        end = txn.end_at[1]
+        if txn.marker is not None:
+            self.markers.append((end, txn_id, txn))
+            self.markers.sort(key=lambda m: m[0])
+        elif (first := self._first_marker()) is not None and end > first:
+            self.held.append((txn_id, txn))  # committed after a marker not yet applied
+        else:
+            self._release(txn_id, txn)
+        self._advance_markers()
+
+    def _first_marker(self) -> int | None:
+        """The END offset of the earliest marker not yet applied, complete or not.
+
+        A marker's END names the marker table, so a marker transaction is known as one from its
+        END on, before its marker event has arrived.
+        """
+        ends = [m[0] for m in self.markers[:1]]
+        ends += [
+            t.end_at[1]
+            for t in self.txns.values()
+            if t.end_at is not None and self.marker_collection in (t.expected or {})
+        ]
+        return min(ends) if ends else None
+
+    def _release(self, txn_id: str, txn: Txn) -> None:
+        self.ready.extend(txn.changes)
+        self.finished_meta.extend([*txn.meta, txn.end_at])
+        self.completed_since_flush.append(txn_id)
+        self.applied.add(txn_id)
+
+    def _advance_markers(self) -> None:
+        """Apply each waiting marker once every transaction that ended before it is applied."""
+        while self.markers:
+            end, txn_id, txn = self.markers[0]
+            # The transaction topic is read in order, so every END before this marker's has been
+            # read; one still open here is an earlier transaction missing some of its events.
+            if any(t.end_at is not None and t.end_at[1] < end for t in self.txns.values()):
+                return
+            self.flush()  # everything that committed before the marker
+            for tp, offset, _ in txn.changes:
+                self.offsets.finished(tp, offset)
+            for tp, offset in [*txn.meta, txn.end_at]:
+                self.offsets.finished(tp, offset)
             self.applied.add(txn_id)
-            del self.txns[txn_id]
+            stats = apply_batch(
+                self.target,
+                [c for _, _, c in txn.changes],
+                self.offsets.committable(),
+                (self.system, [txn_id]),
+                marker=txn.marker,
+            )
+            for k, v in stats.items():
+                self.totals[k] += v
+            self.markers.pop(0)
+            nxt = self._first_marker()
+            still = []
+            for held_id, held in self.held:
+                if nxt is None or held.end_at[1] < nxt:
+                    self._release(held_id, held)
+                else:
+                    still.append((held_id, held))
+            self.held = still
 
     def flush(self) -> None:
         if not self.ready and not self.finished_meta:

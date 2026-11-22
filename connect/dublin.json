@@ -12,7 +12,7 @@
   "slot.name": "live_migration_dublin",
   "publication.name": "live_migration_dublin",
   "publication.autocreate.mode": "filtered",
-  "table.include.list": "public.station,public.station_reading,public.rental,public.debezium_signal",
+  "table.include.list": "public.station,public.station_reading,public.rental,public.debezium_signal,public.verify_marker",
 
   "snapshot.mode": "no_data",
   "signal.data.collection": "public.debezium_signal",

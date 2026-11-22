@@ -9,7 +9,7 @@
   "topic.prefix": "helsinki",
 
   "database.include.list": "helsinki",
-  "table.include.list": "helsinki.asema,helsinki.matka,helsinki.debezium_signal",
+  "table.include.list": "helsinki.asema,helsinki.matka,helsinki.debezium_signal,helsinki.verify_marker",
   "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
   "schema.history.internal.kafka.topic": "schema-history.helsinki",
   "include.schema.changes": "true",
