@@ -370,6 +370,7 @@ def main() -> None:
         v.index_fold_context()
     todo = deque(v.plan(args.tables, args.max_chunks, args.start))
     planned = len(todo)
+    reported = 0
     waiting: deque[Chunk] = deque()
     done: list[Chunk] = []
     findings: list[dict] = []
@@ -402,7 +403,8 @@ def main() -> None:
                     findings.append({"table": c.table, "lo": c.lo, "hi": c.hi, **c.result})
             elif time.monotonic() - c.written_at > args.marker_timeout:
                 raise TimeoutError(f"marker {c.marker_id} ({c.table} {c.lo}..{c.hi}) not applied")
-        if len(done) and len(done) % 100 == 0 and progressed:
+        if len(done) // 100 > reported:  # several chunks can finish at once: a multiple is skipped
+            reported = len(done) // 100
             rate = len(done) / (time.monotonic() - started)
             print(
                 f"{len(done):,}/{planned:,} chunks, {rate:.1f}/s, {len(findings)} findings",
