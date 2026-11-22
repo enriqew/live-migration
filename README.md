@@ -115,3 +115,7 @@ generator.
   [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 - Contains city bike trip data owned by City Bike Finland and city bike station data from HSL,
   both published by HSL (© HSL 2026) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+## License
+
+The code is MIT licensed (see [LICENSE](LICENSE)). The data keeps its own licences, listed above.
