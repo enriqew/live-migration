@@ -126,6 +126,7 @@ uv run python -m verifier.continuous                    # while the generator wr
 
 uv run python -m chaos.run                              # the suite, or name scenarios
 uv run python -m chaos.full_run                         # the full-size run, end to end
+uv run python -m export                                 # the portfolio page's files, from clean runs only
 uv run pytest
 ```
 
