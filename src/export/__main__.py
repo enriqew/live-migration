@@ -35,6 +35,8 @@ from pathlib import Path
 
 import psycopg
 
+from generator.run import percentile
+
 ROOT = Path(__file__).resolve().parents[2]
 RUNS = ROOT / "data" / "runs"
 TARGET = "host=localhost port=5434 dbname=fleet user=fleet password=fleet"
@@ -71,8 +73,8 @@ def ts(s: str) -> datetime:
 
 
 def pct(xs: list[float], q: float) -> float:
-    xs = sorted(xs)
-    return xs[min(len(xs) - 1, int(q * len(xs)))]
+    """The generator's own percentile (nearest rank), so the page quotes what its summary says."""
+    return percentile(sorted(xs), q)
 
 
 def ms(x: float) -> float:
