@@ -1,0 +1,26 @@
+# Lint and the whole test suite on every push and pull request. The tests that need a database run
+# against the same pinned images the project uses (legacy A, legacy B and the target from
+# docker-compose.yml); the rest need nothing running. Kafka, Debezium and the full migration runs
+# stay local: they are what the project measures, not what a check on a commit can afford.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.4.0
+        with:
+          version: "0.11.13"
+      - run: uv python install 3.13
+      - run: uv sync --frozen
+      - run: uv run ruff check src tests
+      - run: uv run ruff format --check src tests
+      - name: Start the three databases
+        run: docker compose up -d --wait legacy-a legacy-b target
+      - run: uv run pytest -q -ra
