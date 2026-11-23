@@ -17,7 +17,7 @@ gives the same bytes.
 |---|---|
 | manifest.json | the headline figures and the run each comes from |
 | pause.json | every request around the cutover's and the rollback's fence, and the steps inside |
-| latency.json | request latency per second through the cycle, and per 10 s through the continuous pass |
+| latency.json | latency per second through the cycle, per 10 s through the continuous pass |
 | snapshot.json | rows applied over time during the snapshot, while the generator wrote |
 | chunks.json | the continuous pass, chunk by chunk |
 | chaos.json | each scenario, what it declared and what it saw |
@@ -45,6 +45,7 @@ CYCLE_REQUESTS = "full-20261121T072905Z-cycle"
 CONTINUOUS_REPORT = "continuous-20261122T173528Z.json"
 CONTINUOUS_REQUESTS = "continuous-20261122T165611Z-load"
 CHAOS_SCENARIOS = 9
+SCHEMA_VERSION = 1  # every file carries it; the page refuses a version it does not know
 
 
 class Refused(RuntimeError):
@@ -112,7 +113,10 @@ def pause(kind: str, record: dict, reqs: list[dict], margin_s: float = 3.0) -> d
             for s in record["steps"]
             if s["at_ms"] >= fence_ms
         ],
-        "window_ms": [-margin_s * 1000, ms((release - fence).total_seconds() * 1000 + margin_s * 1000)],
+        "window_ms": [
+            -margin_s * 1000,
+            ms((release - fence).total_seconds() * 1000 + margin_s * 1000),
+        ],
         "requests": points,
         "failed": sum(1 for p in points if p["result"] == "failed"),
     }
@@ -122,7 +126,7 @@ def pause(kind: str, record: dict, reqs: list[dict], margin_s: float = 3.0) -> d
 
 
 def series(reqs: list[dict], bucket_s: int) -> list[dict]:
-    t0 = min(ts(r["due_at"]) for r in reqs)
+    t0 = start_of(reqs)
     buckets: dict[int, list[float]] = {}
     for r in reqs:
         k = int((ts(r["due_at"]) - t0).total_seconds() // bucket_s)
@@ -137,6 +141,17 @@ def series(reqs: list[dict], bucket_s: int) -> list[dict]:
         }
         for k, v in sorted(buckets.items())
     ]
+
+
+def start_of(reqs: list[dict]) -> datetime:
+    return min(ts(r["due_at"]) for r in reqs)
+
+
+def offset_s(record: dict, reqs: list[dict]) -> float:
+    """When a cutover or rollback fenced, in seconds from the first request of the run."""
+    fence = next(s for s in record["steps"] if s["step"] == "fence")
+    at = ts(record["started_at"]) + timedelta(milliseconds=fence["at_ms"])
+    return round((at - start_of(reqs)).total_seconds(), 1)
 
 
 def overall(reqs: list[dict]) -> dict:
@@ -231,7 +246,9 @@ def chaos() -> list[dict]:
         def facts(d: dict) -> dict:
             keep = {k: v for k, v in d.items() if k not in ("tables", "quarantine")}
             diffs = {
-                t: v for t, v in d.get("tables", {}).items() if v.get("different") or v.get("missing")
+                t: v
+                for t, v in d.get("tables", {}).items()
+                if v.get("different") or v.get("missing")
             }
             if diffs:
                 keep["tables"] = diffs
@@ -259,7 +276,9 @@ def build() -> dict[str, object]:
     report = read(ROOT / "data" / "verify" / CONTINUOUS_REPORT)
     check(full["ok"] and full["verify"]["clean"], f"{FULL_RUN} is not ok")
     check(cycle["ok"] and cycle["verify"]["clean"], f"{CYCLE_RUN} is not ok")
-    check(cycle["cutover"]["ok"] and cycle["rollback"]["ok"], "the cycle's cutover or rollback failed")
+    check(
+        cycle["cutover"]["ok"] and cycle["rollback"]["ok"], "the cycle's cutover or rollback failed"
+    )
     check(report["clean"] and not report["findings"], "the continuous pass has findings")
 
     cycle_reqs = requests(CYCLE_REQUESTS)
@@ -269,7 +288,9 @@ def build() -> dict[str, object]:
     check(load["failed"] == 0, f"{load['failed']} writes failed during the continuous pass")
 
     suite = chaos()
-    check(len(suite) == CHAOS_SCENARIOS, f"{len(suite)} chaos scenarios, expected {CHAOS_SCENARIOS}")
+    check(
+        len(suite) == CHAOS_SCENARIOS, f"{len(suite)} chaos scenarios, expected {CHAOS_SCENARIOS}"
+    )
     check(all(s["passed"] for s in suite), "a chaos scenario failed")
 
     cut = pause("cutover", cycle["cutover"], cycle_reqs)
@@ -304,12 +325,18 @@ def build() -> dict[str, object]:
         "manifest.json": manifest,
         "pause.json": {"cutover": cut, "rollback": back},
         "latency.json": {
-            "cycle": {"bucket_s": 1, "points": series(cycle_reqs, 1), **cyc},
+            "cycle": {
+                "bucket_s": 1,
+                "points": series(cycle_reqs, 1),
+                "cutover_s": offset_s(cycle["cutover"], cycle_reqs),
+                "rollback_s": offset_s(cycle["rollback"], cycle_reqs),
+                **cyc,
+            },
             "continuous": {"bucket_s": 10, "points": series(load_reqs, 10), **load},
         },
         "snapshot.json": {"run": FULL_RUN, "points": snap},
         "chunks.json": chunks(report),
-        "chaos.json": suite,
+        "chaos.json": {"scenarios": suite},
     }
 
 
@@ -324,6 +351,7 @@ def main() -> None:
         sys.exit(1)
     out.mkdir(parents=True, exist_ok=True)
     for name, data in files.items():
+        data = {"schema_version": SCHEMA_VERSION, **data}
         text = json.dumps(data, sort_keys=True, separators=(",", ":"), default=str) + "\n"
         (out / name).write_text(text, encoding="utf8", newline="\n")
         print(f"{name}: {len(text) / 1024:,.1f} KB")
