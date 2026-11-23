@@ -244,14 +244,14 @@ def chaos() -> list[dict]:
         n = r["scenario"][:2]
 
         def facts(d: dict) -> dict:
+            # `rows_equal` is the row counts only; what the verifier named row by row is in
+            # `differences`, empty when it named nothing.
             keep = {k: v for k, v in d.items() if k not in ("tables", "quarantine")}
-            diffs = {
+            keep["differences"] = {
                 t: v
                 for t, v in d.get("tables", {}).items()
-                if v.get("different") or v.get("missing")
+                if v.get("different") or v.get("missing") or v.get("unexpected")
             }
-            if diffs:
-                keep["tables"] = diffs
             return keep
 
         out.append(
